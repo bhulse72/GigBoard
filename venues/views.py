@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Venue, VenueManager
 from .forms import VenueForm
+from gigs.models import GigListing
 
 
 def can_manage_venue(user, venue):
@@ -86,3 +87,14 @@ def edit_venue(request, pk):
     else:
         form = VenueForm(instance=venue)
     return render(request, 'venues/edit.html', {'form': form, 'venue': venue})
+
+@login_required
+def manage_venue(request, pk):
+    venue = get_object_or_404(Venue, pk=pk)
+    if not can_manage_venue(request.user, venue):
+        messages.error(request, 'You do not have access to that venue.')
+        return redirect('venues:dashboard')
+    request.session['active_venue_id'] = venue.pk
+    request.session['active_venue_name'] = venue.name
+    gig_listings = GigListing.objects.filter(venue=venue).order_by('-event_date')
+    return render(request, 'venues/manage.html', {'venue': venue, 'gig_listings': gig_listings})

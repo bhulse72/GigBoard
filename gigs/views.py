@@ -28,16 +28,13 @@ def create_listing(request):
         messages.error(request, 'Only venue owners and managers can create listings.')
         return redirect('gigs:listing_list')
 
-    # get active venue from session
+    venues = Venue.objects.filter(owner=request.user)
     active_venue_id = request.session.get('active_venue_id')
-    if not active_venue_id:
-        messages.error(request, 'Please select a venue first.')
-        return redirect('venues:dashboard')
-
-    venue = get_object_or_404(Venue, pk=active_venue_id)
 
     if request.method == 'POST':
         form = GigListingForm(request.POST)
+        venue_id = request.POST.get('venue_id')
+        venue = get_object_or_404(Venue, pk=venue_id, owner=request.user)
         if form.is_valid():
             listing = form.save(commit=False)
             listing.created_by = request.user
@@ -48,10 +45,12 @@ def create_listing(request):
             return redirect('gigs:my_listings')
     else:
         form = GigListingForm()
+        venue = get_object_or_404(Venue, pk=active_venue_id) if active_venue_id else None
 
     return render(request, 'gigs/create_listing.html', {
         'form': form,
-        'venue': venue,
+        'venues': venues,
+        'active_venue': venue,
     })
 
 
@@ -62,18 +61,12 @@ def my_listings(request):
         return redirect('gigs:listing_list')
 
     active_venue_id = request.session.get('active_venue_id')
-    if not active_venue_id:
-        messages.error(request, 'Please select a venue first.')
-        return redirect('venues:dashboard')
-
-    venue = get_object_or_404(Venue, pk=active_venue_id)
-    listings = GigListing.objects.filter(venue=venue).order_by('-created_at')
+    listings = GigListing.objects.filter(created_by=request.user).order_by('-created_at')
 
     return render(request, 'gigs/my_listings.html', {
         'listings': listings,
-        'venue': venue,
+        'active_venue_id': active_venue_id,
     })
-
 
 @login_required
 def close_listing(request, pk):

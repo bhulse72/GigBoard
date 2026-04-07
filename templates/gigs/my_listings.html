@@ -6,10 +6,11 @@
 <div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">
-            Listings —
-            <span style="color: var(--accent);">{{ venue.name }}</span>
-        </h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">
+                My Listings —
+            </h1>
+        </div>
         <a href="{% url 'gigs:create_listing' %}" class="btn-gc btn-gc-filled">+ Create Listing</a>
     </div>
 

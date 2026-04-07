@@ -13,6 +13,16 @@
         </div>
         <form method="post">
             {% csrf_token %}
+            <div class="mb-3">
+                <label for="venue_id">Venue</label>
+                <select name="venue_id" id="venue_id" class="form-control" required>
+                    {% for v in venues %}
+                        <option value="{{ v.pk }}" {% if active_venue and active_venue.pk == v.pk %}selected{% endif %}>
+                            {{ v.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
             {% for field in form %}
                 <div class="mb-3">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>

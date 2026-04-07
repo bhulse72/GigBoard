@@ -66,8 +66,22 @@
                 </p>
             </div>
             <div class="gc-card gc-card-body">
-                <div class="gc-card-title">Gig Listings</div>
-                <p style="font-size: 13px; color: var(--text-muted);">No listings yet.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="gc-card-title" style="margin: 0;">Gig Listings</div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{% url 'gigs:create_listing' %}" class="btn-gc btn-gc-filled">+ Create Gig</a>
+                    </div>
+                </div>
+                {% if gig_listings %}
+                    {% for gig in gig_listings %}
+                        <div style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">{{ gig.title }}</div>
+                            <div style="color: var(--text-muted); margin-top: 2px;">{{ gig.event_date }} · {{ gig.venue_name }} · ${{ gig.pay }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 13px; color: var(--text-muted);">No listings yet.</p>
+                {% endif %}
             </div>
         </div>
     </div>
