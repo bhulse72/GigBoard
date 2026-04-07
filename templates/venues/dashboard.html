@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My Venues — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">My Venues</h1>
+        {% if user.is_venue_owner %}
+            <a href="{% url 'venues:create' %}" class="btn-gc btn-gc-filled">+ Add Venue</a>
+        {% endif %}
+    </div>
+
+    {% if venues %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+            {% for venue in venues %}
+                <div class="gc-card">
+                    <div style="height: 80px; background: linear-gradient(135deg, #4c1d95, #7c3aed); display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -1px;">
+                            {{ venue.name|slice:":2"|upper }}
+                        </span>
+                    </div>
+                    <div class="gc-card-body">
+                        <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ venue.name }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ venue.city }}, {{ venue.state }}</div>
+                        {% if venue.genre_tags %}
+                            <div style="margin-top: 8px;">
+                                {% for tag in venue.genre_tags.split %}
+                                    <span class="gc-tag">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'venues:select' venue.pk %}" class="btn-gc btn-gc-filled d-block text-center mt-3">
+                            Manage Venue
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted); margin-bottom: 16px;">You have no venues yet.</p>
+            {% if user.is_venue_owner %}
+                <a href="{% url 'venues:create' %}" class="btn-gc btn-gc-filled">+ Create your first venue</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

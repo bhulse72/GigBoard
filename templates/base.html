@@ -12,9 +12,22 @@
 <body>
 
     <nav class="navbar">
-        <a class="navbar-brand" href="/">GigBoard</a>
+        <div style="display: flex; align-items: center; gap: 24px;">
+            <a class="navbar-brand" href="/">GigBoard</a>
+            {% if request.session.active_venue_name %}
+                <span style="color: var(--text-muted); font-size: 13px;">|</span>
+                <span style="color: var(--accent); font-size: 13px; font-weight: 600;">
+                    {{ request.session.active_venue_name }}
+                </span>
+            {% endif %}
+        </div>
         <ul class="navbar-nav flex-row gap-2">
             {% if user.is_authenticated %}
+                {% if user.is_venue_owner or user.is_manager %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'venues:dashboard' %}">My Venues</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
                 </li>
