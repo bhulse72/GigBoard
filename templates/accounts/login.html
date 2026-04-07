@@ -1,12 +1,37 @@
 {% extends 'base.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login — GigBoard{% endblock %}
 
 {% block content %}
-    <h2>Login</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="gc-card" style="width: 100%; max-width: 420px;">
+        <div class="profile-banner"></div>
+        <div class="gc-card-body p-4">
+            <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                Welcome back
+            </h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">
+                Sign in to your GigBoard account
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-gc btn-gc-filled w-100 mt-2">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

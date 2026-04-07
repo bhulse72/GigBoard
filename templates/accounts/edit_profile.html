@@ -1,13 +1,65 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Edit Profile — GigBoard{% endblock %}
 
 {% block content %}
-    <h2>Edit Profile</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Changes</button>
-        <a href="{% url 'accounts:profile' %}">Cancel</a>
-    </form>
+<div class="page-layout">
+
+    <!-- Left Sidebar -->
+    <div>
+        <div class="gc-card">
+            <div class="profile-banner"></div>
+            <div class="profile-avatar">
+                {{ user.username|slice:":2"|upper }}
+            </div>
+            <div class="gc-card-body">
+                <div class="profile-name">
+                    {% if user.get_full_name %}
+                        {{ user.get_full_name }}
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}
+                </div>
+                <span class="profile-role-badge">{{ user.get_role_display }}</span>
+                {% if user.location %}
+                    <div class="profile-location">{{ user.location }}</div>
+                {% endif %}
+                <hr class="profile-divider">
+                <a href="{% url 'accounts:profile' %}" class="btn-gc w-100 text-center d-block">
+                    View Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">Edit Profile</div>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn-gc btn-gc-filled">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'accounts:profile' %}" class="btn-gc">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
 {% endblock %}

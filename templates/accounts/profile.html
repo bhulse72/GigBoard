@@ -1,13 +1,77 @@
 {% extends 'base.html' %}
 
-{% block title %}My Profile{% endblock %}
+{% block title %}{{ user.username }} — GigBoard{% endblock %}
 
 {% block content %}
-    <h2>{{ user.username }}</h2>
-    <p><strong>Role:</strong> {{ user.get_role_display }}</p>
-    <p><strong>Location:</strong> {{ user.location|default:"Not set" }}</p>
-    <p><strong>Bio:</strong> {{ user.bio|default:"Not set" }}</p>
-    <p><strong>Email:</strong> {{ user.email|default:"Not set" }}</p>
-    <p><strong>Name:</strong> {{ user.get_full_name|default:"Not set" }}</p>
-    <a href="{% url 'accounts:edit_profile' %}">Edit Profile</a>
+<div class="page-layout">
+
+    <!-- Left Sidebar -->
+    <div>
+        <div class="gc-card">
+            <div class="profile-banner"></div>
+            <div class="profile-avatar">
+                {{ user.username|slice:":2"|upper }}
+            </div>
+            <div class="gc-card-body">
+                <div class="profile-name">
+                    {% if user.get_full_name %}
+                        {{ user.get_full_name }}
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}
+                </div>
+                <span class="profile-role-badge">{{ user.get_role_display }}</span>
+                {% if user.location %}
+                    <div class="profile-location">{{ user.location }}</div>
+                {% endif %}
+                {% if user.bio %}
+                    <div class="profile-bio mt-2">{{ user.bio }}</div>
+                {% endif %}
+                <hr class="profile-divider">
+                <a href="{% url 'accounts:edit_profile' %}" class="btn-gc w-100 text-center d-block">
+                    Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">Account Details</div>
+            <table class="w-100" style="font-size: 14px; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 10px 0; color: var(--text-muted); width: 140px;">Username</td>
+                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.username }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 10px 0; color: var(--text-muted);">Email</td>
+                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.email|default:"Not set" }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 10px 0; color: var(--text-muted);">Full Name</td>
+                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.get_full_name|default:"Not set" }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 10px 0; color: var(--text-muted);">Location</td>
+                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.location|default:"Not set" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px 0; color: var(--text-muted);">Role</td>
+                    <td style="padding: 10px 0;">
+                        <span class="gc-tag">{{ user.get_role_display }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% if user.bio %}
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">About</div>
+            <p style="font-size: 14px; color: var(--text-secondary);">{{ user.bio }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
 {% endblock %}
