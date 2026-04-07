@@ -1,12 +1,12 @@
 from django import forms
-from .models import GigListing 
+from .models import GigListing
+
 
 class GigListingForm(forms.ModelForm):
     class Meta:
         model = GigListing
         fields = [
             'title',
-            'venue_name',
             'location',
             'event_date',
             'start_time',

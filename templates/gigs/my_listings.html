@@ -3,38 +3,58 @@
 {% block title %}My Listings — GigBoard{% endblock %}
 
 {% block content %}
-<div class="page-layout">
-    <div></div>
-    <div>
-        <div class="gc-card gc-card-body">
-            <div class="gc-card-title">My Listings</div>
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
 
-            {% if listings %}
-                {% for listing in listings %}
-                    <div class="gc-card mb-3">
-                        <div class="gc-card-body">
-                            <h5>{{ listing.title }}</h5>
-                            <div class="profile-location">
-                                {{ listing.venue_name }}
-                                {% if listing.location %} • {{ listing.location }}{% endif %}
-                            </div>
-                            <div class="mt-2">
-                                <span class="gc-tag">{{ listing.get_preferred_style_display }}</span>
-                                <span class="gc-tag">${{ listing.pay }}</span>
-                            </div>
-                            <p class="mt-2" style="color: var(--text-secondary);">
-                                {{ listing.description|default:"No description provided." }}
-                            </p>
-                            <small style="color: var(--text-muted);">
-                                {{ listing.event_date }} at {{ listing.start_time }}
-                            </small>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">
+            Listings —
+            <span style="color: var(--accent);">{{ venue.name }}</span>
+        </h1>
+        <a href="{% url 'gigs:create_listing' %}" class="btn-gc btn-gc-filled">+ Create Listing</a>
+    </div>
+
+    {% if listings %}
+        {% for listing in listings %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <h5 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0;">
+                                {{ listing.title }}
+                            </h5>
+                            {% if listing.is_open %}
+                                <span class="gc-tag" style="background: #1a3a1a; color: #6fcf6f;">Open</span>
+                            {% else %}
+                                <span class="gc-tag" style="background: #2a1a1a; color: #f87171;">Closed</span>
+                            {% endif %}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-muted);">
+                            {{ listing.event_date }} at {{ listing.start_time }}
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <span class="gc-tag">{{ listing.get_preferred_style_display }}</span>
+                            <span class="gc-tag">${{ listing.pay }}</span>
                         </div>
                     </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: var(--text-muted);">You have not created any listings yet.</p>
-            {% endif %}
+                    <div style="display: flex; gap: 8px; flex-shrink: 0; margin-left: 16px;">
+                        {% if listing.is_open %}
+                            <form method="post" action="{% url 'gigs:close_listing' listing.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-gc" style="border-color: #f87171; color: #f87171;">
+                                    Close
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted); margin-bottom: 16px;">No listings for this venue yet.</p>
+            <a href="{% url 'gigs:create_listing' %}" class="btn-gc btn-gc-filled">+ Create your first listing</a>
         </div>
-    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

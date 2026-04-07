@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
+from venues.models import Venue
 
-# Create your models here.
+
 class GigListing(models.Model):
     STYLE_CHOICES = [
         ('open_format', 'Open Format'),
@@ -13,6 +14,13 @@ class GigListing(models.Model):
         ('other', 'Other'),
     ]
 
+    venue = models.ForeignKey(
+        Venue,
+        on_delete=models.CASCADE,
+        related_name='gig_listings',
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=200)
     venue_name = models.CharField(max_length=200)
     location = models.CharField(max_length=255, blank=True)
@@ -22,13 +30,11 @@ class GigListing(models.Model):
     preferred_style = models.CharField(max_length=30, choices=STYLE_CHOICES)
     description = models.TextField(blank=True)
     is_open = models.BooleanField(default=True)
-
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='gig_listings'
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

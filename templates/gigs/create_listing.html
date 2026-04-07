@@ -3,29 +3,30 @@
 {% block title %}Create Listing — GigBoard{% endblock %}
 
 {% block content %}
-<div class="page-layout">
-    <div></div>
-    <div>
-        <div class="gc-card gc-card-body">
-            <div class="gc-card-title">Create Gig Listing</div>
-
-            <form method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-
-                <button type="submit" class="btn-gc btn-gc-filled">Create Listing</button>
-            </form>
+<div style="max-width: 680px; margin: 24px auto; padding: 0 16px;">
+    <div class="gc-card gc-card-body">
+        <div class="gc-card-title">
+            Create Gig Listing
+            <span style="font-size: 13px; font-weight: 400; color: var(--accent); margin-left: 8px;">
+                {{ venue.name }}
+            </span>
         </div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #f87171; font-size: 12px; margin-top: 4px;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn-gc btn-gc-filled">Create Listing</button>
+                <a href="{% url 'gigs:my_listings' %}" class="btn-gc">Cancel</a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
