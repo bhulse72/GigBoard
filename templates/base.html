@@ -12,9 +12,25 @@
 <body>
 
     <nav class="navbar">
-        <a class="navbar-brand" href="/">GigBoard</a>
+        <div style="display: flex; align-items: center; gap: 24px;">
+            <a class="navbar-brand" href="/">GigBoard</a>
+            
+        </div>
         <ul class="navbar-nav flex-row gap-2">
             {% if user.is_authenticated %}
+                {% if user.is_venue_owner or user.is_manager %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'venues:dashboard' %}">My Venues</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'gigs:my_listings' %}">My Gigs</a>
+                    </li>
+                {% endif %}
+                {% if user.is_performer %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'gigs:listing_list' %}">Find Gigs</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
                 </li>

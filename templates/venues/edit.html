@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ venue.name }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 24px auto; padding: 0 16px;">
+    <div class="gc-card gc-card-body">
+        <div class="gc-card-title">Edit {{ venue.name }}</div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #f87171; font-size: 12px; margin-top: 4px;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn-gc btn-gc-filled">Save Changes</button>
+                <a href="{% url 'venues:manage' venue.pk %}" class="btn-gc">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

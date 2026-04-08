@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ venue.name }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 1080px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Venue Header -->
+    <div class="gc-card" style="margin-bottom: 20px;">
+        <div style="height: 100px; background: linear-gradient(135deg, #4c1d95, #7c3aed);"></div>
+        <div class="gc-card-body" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 700; color: var(--text-primary);">{{ venue.name }}</h1>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">{{ venue.city }}, {{ venue.state }}</div>
+                {% if venue.genre_tags %}
+                    <div style="margin-top: 8px;">
+                        {% for tag in venue.genre_tags.split %}
+                            <span class="gc-tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a href="{% url 'venues:edit' venue.pk %}" class="btn-gc">Edit Venue</a>
+                <a href="{% url 'venues:dashboard' %}" class="btn-gc">Switch Venue</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-layout">
+        <!-- Left Sidebar -->
+        <div>
+            <div class="gc-card gc-card-body">
+                <div class="gc-card-title">Venue Details</div>
+                <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 8px 0; color: var(--text-muted);">Address</td>
+                        <td style="padding: 8px 0; color: var(--text-primary);">{{ venue.address|default:"Not set" }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 8px 0; color: var(--text-muted);">Capacity</td>
+                        <td style="padding: 8px 0; color: var(--text-primary);">{{ venue.capacity|default:"Not set" }}</td>
+                    </tr>
+                    {% if venue.website %}
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 8px 0; color: var(--text-muted);">Website</td>
+                        <td style="padding: 8px 0;"><a href="{{ venue.website }}" target="_blank">Visit</a></td>
+                    </tr>
+                    {% endif %}
+                    {% if venue.instagram %}
+                    <tr>
+                        <td style="padding: 8px 0; color: var(--text-muted);">Instagram</td>
+                        <td style="padding: 8px 0;"><a href="{{ venue.instagram }}" target="_blank">Profile</a></td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div>
+            <div class="gc-card gc-card-body">
+                <div class="gc-card-title">About</div>
+                <p style="font-size: 14px; color: var(--text-secondary);">
+                    {{ venue.description|default:"No description yet." }}
+                </p>
+            </div>
+            <div class="gc-card gc-card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="gc-card-title" style="margin: 0;">Gig Listings</div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{% url 'gigs:create_listing' %}" class="btn-gc btn-gc-filled">+ Create Gig</a>
+                    </div>
+                </div>
+                {% if gig_listings %}
+                    {% for gig in gig_listings %}
+                        <div style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">{{ gig.title }}</div>
+                            <div style="color: var(--text-muted); margin-top: 2px;">{{ gig.event_date }} · {{ gig.venue_name }} · ${{ gig.pay }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 13px; color: var(--text-muted);">No listings yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

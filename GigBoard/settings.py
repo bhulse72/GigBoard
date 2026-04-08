@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Local apps
     'accounts.apps.AccountsConfig',
-    'venues',
+    'venues.apps.VenuesConfig',
     'performers',
     'gigs',
     'core',

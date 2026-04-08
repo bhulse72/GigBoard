@@ -5,6 +5,7 @@ from django.db import models
 class User(AbstractUser):
     class Role(models.TextChoices):
         VENUE_OWNER = 'venue_owner', 'Venue Owner'
+        MANAGER = 'manager', 'Manager'
         PERFORMER = 'performer', 'Performer'
         FAN = 'fan', 'Fan'
 
@@ -19,6 +20,9 @@ class User(AbstractUser):
 
     def is_venue_owner(self):
         return self.role == self.Role.VENUE_OWNER
+
+    def is_manager(self):
+        return self.role == self.Role.MANAGER
 
     def is_performer(self):
         return self.role == self.Role.PERFORMER
