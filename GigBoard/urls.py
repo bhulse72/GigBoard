@@ -8,4 +8,5 @@ urlpatterns = [
     path('gigs/', include('gigs.urls', namespace='gigs')),
     path('performers/', include('performers.urls')),
     path('', include('core.urls')),
+    path('lessons/', include('lessons.urls', namespace='lessons')),
 ]

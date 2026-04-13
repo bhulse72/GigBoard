@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Lessons — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">Browse Lessons</h1>
+        {% if user.is_authenticated and user.is_performer %}
+            <a href="{% url 'lessons:create_listing' %}" class="btn-gc btn-gc-filled">+ Offer a Lesson</a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="gc-card gc-card-body mb-4">
+        <form method="get" class="d-flex gap-3 align-items-center flex-wrap">
+            <select name="style" class="form-select" style="max-width: 180px;">
+                <option value="">All Styles</option>
+                {% for value, label in style_choices %}
+                    <option value="{{ value }}" {% if selected_style == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="format" class="form-select" style="max-width: 180px;">
+                <option value="">Any Format</option>
+                {% for value, label in format_choices %}
+                    <option value="{{ value }}" {% if selected_format == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-gc">Filter</button>
+            {% if selected_style or selected_format %}
+                <a href="{% url 'lessons:listing_list' %}" class="btn-gc">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if listings %}
+        {% for listing in listings %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h5 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                            {{ listing.title }}
+                        </h5>
+                        <div style="font-size: 13px; color: var(--text-muted);">
+                            by {{ listing.instructor.username }}
+                            {% if listing.location %} · {{ listing.location }}{% endif %}
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <span class="gc-tag">{{ listing.get_style_display }}</span>
+                            <span class="gc-tag">{{ listing.get_format_display }}</span>
+                            <span class="gc-tag">{{ listing.duration_minutes }} min</span>
+                            <span class="gc-tag">${{ listing.price }}</span>
+                        </div>
+                        {% if listing.description %}
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
+                                {{ listing.description|truncatewords:20 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div style="flex-shrink: 0; margin-left: 16px;">
+                        <a href="{% url 'lessons:listing_detail' listing.pk %}" class="btn-gc btn-gc-filled">
+                            View & Book
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted);">No lessons available right now.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

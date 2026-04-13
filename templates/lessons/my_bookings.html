@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">My Bookings</h1>
+
+    {% if bookings %}
+        {% for booking in bookings %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">
+                    {{ booking.slot.listing.title }}
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                    Instructor: {{ booking.slot.listing.instructor.username }}
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted);">
+                    Location: {{ booking.slot.listing.location|default:"Not specified" }}
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted);">
+                    {{ booking.slot.date }} at {{ booking.slot.start_time }}
+                </div>
+                <div style="margin-top: 8px;">
+                    <span class="gc-tag">{{ booking.slot.listing.get_style_display }}</span>
+                    <span class="gc-tag">${{ booking.slot.listing.price }}</span>
+                </div>
+                {% if booking.note %}
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
+                        Note: {{ booking.note }}
+                    </p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted); margin-bottom: 16px;">You have no bookings yet.</p>
+            <a href="{% url 'lessons:listing_list' %}" class="btn-gc btn-gc-filled">Browse Lessons</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
