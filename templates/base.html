@@ -17,7 +17,11 @@
             
         </div>
         <ul class="navbar-nav flex-row gap-2">
-
+            {% if user.is_authenticated and user.is_performer %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'performers:directory' %}">Network</a>
+                </li>
+            {% endif %}
             {% if user.is_authenticated %}
                 {% if user.is_performer %}
                     <li class="nav-item">
