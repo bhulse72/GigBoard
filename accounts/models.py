@@ -18,6 +18,10 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
 
+    stage_name = models.CharField(max_length=100, blank=True)
+    music_style = models.CharField(max_length=100, blank=True)
+    interests = models.CharField(max_length=255, blank=True)
+
     def is_venue_owner(self):
         return self.role == self.Role.VENUE_OWNER
 
@@ -32,3 +36,4 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username} ({self.get_role_display()})'
+

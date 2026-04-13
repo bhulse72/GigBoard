@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}My Collaboration Requests — GigBoard{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div></div>
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">Incoming Requests</div>
+            {% if incoming_requests %}
+                {% for req in incoming_requests %}
+                    <div class="gc-card mb-3">
+                        <div class="gc-card-body">
+                            <strong>{{ req.sender.username }}</strong>
+                            <div class="mt-2" style="color: var(--text-secondary);">
+                                {{ req.message|default:"No message." }}
+                            </div>
+                            <div class="mt-2">
+                                <span class="gc-tag">{{ req.get_status_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No incoming requests.</p>
+            {% endif %}
+        </div>
+
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">Outgoing Requests</div>
+            {% if outgoing_requests %}
+                {% for req in outgoing_requests %}
+                    <div class="gc-card mb-3">
+                        <div class="gc-card-body">
+                            <strong>{{ req.receiver.username }}</strong>
+                            <div class="mt-2" style="color: var(--text-secondary);">
+                                {{ req.message|default:"No message." }}
+                            </div>
+                            <div class="mt-2">
+                                <span class="gc-tag">{{ req.get_status_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No outgoing requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

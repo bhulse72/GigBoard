@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Performer Network — GigBoard{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div></div>
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="gc-card-title mb-0">Performer Network</div>
+                <a href="{% url 'performers:requests' %}" class="btn-gc">My Requests</a>
+            </div>
+
+            {% if performers %}
+                {% for performer in performers %}
+                    <div class="gc-card mb-3">
+                        <div class="gc-card-body">
+                            <h5>
+                                {% if performer.stage_name %}
+                                    {{ performer.stage_name }}
+                                {% else %}
+                                    {{ performer.username }}
+                                {% endif %}
+                            </h5>
+
+                            <div class="profile-location">
+                                {{ performer.location|default:"Location not set" }}
+                            </div>
+
+                            {% if performer.music_style %}
+                                <div class="mt-2">
+                                    <span class="gc-tag">{{ performer.music_style }}</span>
+                                </div>
+                            {% endif %}
+
+                            {% if performer.interests %}
+                                <p class="mt-2" style="color: var(--text-secondary);">
+                                    Interests: {{ performer.interests }}
+                                </p>
+                            {% endif %}
+
+                            {% if performer.bio %}
+                                <p class="mt-2" style="color: var(--text-secondary);">
+                                    {{ performer.bio }}
+                                </p>
+                            {% endif %}
+
+                            <a href="{% url 'performers:send_request' performer.id %}" class="btn-gc btn-gc-filled mt-2">
+                                Send Collaboration Request
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No performers found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
