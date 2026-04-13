@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Send Request — GigBoard{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div></div>
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="gc-card-title">
+                Send Collaboration Request to
+                {% if receiver.stage_name %}{{ receiver.stage_name }}{% else %}{{ receiver.username }}{% endif %}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-gc btn-gc-filled">Send Request</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
