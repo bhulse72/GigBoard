@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}My Lesson Listings — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">My Lesson Listings</h1>
+        <a href="{% url 'lessons:create_listing' %}" class="btn-gc btn-gc-filled">+ New Listing</a>
+    </div>
+
+    {% if listings %}
+        {% for listing in listings %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ listing.title }}</div>
+                        <div style="margin-top: 6px;">
+                            <span class="gc-tag">{{ listing.get_style_display }}</span>
+                            <span class="gc-tag">{{ listing.get_format_display }}</span>
+                            <span class="gc-tag">${{ listing.price }}</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+                            {{ listing.time_slots.count }} slot(s) total ·
+                            {{ listing.time_slots.filter.is_booked.False.count }} available
+                        </div>
+                    </div>
+                    <a href="{% url 'lessons:listing_detail' listing.pk %}" class="btn-gc">Manage</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted); margin-bottom: 16px;">You have no lesson listings yet.</p>
+            <a href="{% url 'lessons:create_listing' %}" class="btn-gc btn-gc-filled">+ Create your first listing</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ listing.title }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 780px; margin: 24px auto; padding: 0 16px;">
+
+    <a href="{% url 'lessons:listing_list' %}" class="btn-gc" style="margin-bottom: 16px; display: inline-block;">← Back</a>
+
+    <div class="gc-card gc-card-body mb-4">
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">{{ listing.title }}</h1>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+            by {{ listing.instructor.username }}
+            {% if listing.location %} · {{ listing.location }}{% endif %}
+        </div>
+        <div style="margin-top: 10px;">
+            <span class="gc-tag">{{ listing.get_style_display }}</span>
+            <span class="gc-tag">{{ listing.get_format_display }}</span>
+            <span class="gc-tag">{{ listing.duration_minutes }} min</span>
+            <span class="gc-tag">${{ listing.price }}</span>
+        </div>
+        {% if listing.description %}
+            <p style="font-size: 14px; color: var(--text-secondary); margin-top: 12px;">{{ listing.description }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Add slot form (instructor only) -->
+    {% if slot_form %}
+        <div class="gc-card gc-card-body mb-4">
+            <div class="gc-card-title">Add Available Time Slot</div>
+            <form method="post" action="{% url 'lessons:add_slot' listing.pk %}">
+                {% csrf_token %}
+                <div class="d-flex gap-3 align-items-end flex-wrap">
+                    {% for field in slot_form %}
+                        <div>
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn-gc btn-gc-filled">Add Slot</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    <!-- Available slots -->
+    <div class="gc-card gc-card-body">
+        <div class="gc-card-title">Available Time Slots</div>
+        {% if available_slots %}
+            {% for slot in available_slots %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;">
+                    <div>
+                        <span style="color: var(--text-primary); font-weight: 600;">{{ slot.date }}</span>
+                        <span style="color: var(--text-muted); margin-left: 8px;">at {{ slot.start_time }}</span>
+                    </div>
+                    {% if user.is_authenticated and user != listing.instructor %}
+                        <a href="{% url 'lessons:book_slot' listing.pk slot.pk %}" class="btn-gc btn-gc-filled">Book</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="font-size: 13px; color: var(--text-muted);">No available slots right now.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

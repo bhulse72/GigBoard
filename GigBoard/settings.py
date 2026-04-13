@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'gigs',
     'core',
     'fans',
+    'lessons.apps.LessonsConfig',
 ]
 
 MIDDLEWARE = [
