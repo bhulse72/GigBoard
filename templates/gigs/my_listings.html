@@ -37,7 +37,10 @@
                             <span class="gc-tag">${{ listing.pay }}</span>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-shrink: 0; margin-left: 16px;">
+                    <div style="display: flex; gap: 8px; flex-shrink: 0; margin-left: 16px; align-items: flex-start;">
+                        <a href="{% url 'gigs:listing_applications' listing.pk %}" class="btn-gc" style="font-size: 13px;">
+                            Applications ({{ listing.applications.count }})
+                        </a>
                         {% if listing.is_open %}
                             <form method="post" action="{% url 'gigs:close_listing' listing.pk %}">
                                 {% csrf_token %}

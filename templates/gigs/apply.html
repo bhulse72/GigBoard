@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply — {{ listing.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+        Apply to: {{ listing.title }}
+    </h1>
+    <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">
+        {{ listing.venue_name }} · {{ listing.event_date }} at {{ listing.start_time }} · ${{ listing.pay }}
+    </p>
+
+    <div class="gc-card gc-card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label style="font-size: 14px; font-weight: 500; color: var(--text-primary);">
+                    Message to venue <span style="color: var(--text-muted); font-weight: 400;">(optional)</span>
+                </label>
+                <textarea name="message" class="form-control mt-1" rows="4"
+                    placeholder="Tell the venue a bit about yourself or why you're a great fit..."></textarea>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn-gc btn-gc-filled">Submit Application</button>
+                <a href="{% url 'gigs:listing_list' %}" class="btn-gc">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

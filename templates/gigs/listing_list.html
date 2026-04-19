@@ -56,6 +56,16 @@
                     <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
                         <div style="font-size: 13px; color: var(--text-primary);">{{ listing.event_date }}</div>
                         <div style="font-size: 12px; color: var(--text-muted);">{{ listing.start_time }}</div>
+                        <div style="margin-top: 10px;">
+                            {% if user.is_performer %}
+                                <a href="{% url 'gigs:apply' listing.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">Apply</a>
+                            {% endif %}
+                            {% if user.is_venue_owner or user.is_manager %}
+                                <a href="{% url 'gigs:listing_applications' listing.pk %}" class="btn-gc" style="font-size: 12px;">
+                                    Applications ({{ listing.applications.count }})
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

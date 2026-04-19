@@ -39,3 +39,31 @@ class GigListing(models.Model):
 
     def __str__(self):
         return f"{self.title} @ {self.venue_name}"
+
+
+class GigApplication(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
+    listing = models.ForeignKey(
+        GigListing,
+        on_delete=models.CASCADE,
+        related_name='applications',
+    )
+    performer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='gig_applications',
+    )
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('listing', 'performer')
+
+    def __str__(self):
+        return f"{self.performer} → {self.listing}"

@@ -1,7 +1,9 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import GigListing
+from django.http import JsonResponse
+from .models import GigListing, GigApplication
 from .forms import GigListingForm
 from venues.models import Venue
 
@@ -78,3 +80,92 @@ def close_listing(request, pk):
     listing.save()
     messages.success(request, 'Listing closed successfully.')
     return redirect('gigs:my_listings')
+
+
+@login_required
+def apply_to_gig(request, pk):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can apply to gigs.')
+        return redirect('gigs:listing_list')
+
+    listing = get_object_or_404(GigListing, pk=pk, is_open=True)
+
+    if GigApplication.objects.filter(listing=listing, performer=request.user).exists():
+        messages.info(request, 'You have already applied to this gig.')
+        return redirect('gigs:listing_list')
+
+    if request.method == 'POST':
+        message = request.POST.get('message', '')
+        GigApplication.objects.create(listing=listing, performer=request.user, message=message)
+        messages.success(request, 'Application submitted!')
+        return redirect('gigs:listing_list')
+
+    return render(request, 'gigs/apply.html', {'listing': listing})
+
+
+@login_required
+def listing_applications(request, pk):
+    listing = get_object_or_404(GigListing, pk=pk, created_by=request.user)
+    applications = listing.applications.select_related('performer').order_by('created_at')
+    return render(request, 'gigs/applications.html', {
+        'listing': listing,
+        'applications': applications,
+    })
+
+
+@login_required
+def update_application(request, pk):
+    application = get_object_or_404(GigApplication, pk=pk, listing__created_by=request.user)
+    new_status = request.POST.get('status')
+    if new_status in ('accepted', 'declined'):
+        application.status = new_status
+        application.save()
+        messages.success(request, f'Application {new_status}.')
+    return redirect('gigs:listing_applications', pk=application.listing.pk)
+
+
+@login_required
+def calendar_view(request):
+    return render(request, 'gigs/calendar.html')
+
+
+@login_required
+def calendar_events(request):
+    events = []
+
+    if request.user.is_venue_owner() or request.user.is_manager():
+        listings = GigListing.objects.filter(created_by=request.user)
+        for listing in listings:
+            accepted = listing.applications.filter(status='accepted').first()
+            events.append({
+                'title': listing.title,
+                'start': f"{listing.event_date}T{listing.start_time}",
+                'color': '#4f46e5' if listing.is_open else '#6b7280',
+                'extendedProps': {
+                    'venue': listing.venue_name,
+                    'pay': str(listing.pay),
+                    'style': listing.get_preferred_style_display(),
+                    'status': 'Open' if listing.is_open else 'Closed',
+                    'performer': str(accepted.performer) if accepted else 'No performer yet',
+                },
+            })
+
+    elif request.user.is_performer():
+        applications = GigApplication.objects.filter(
+            performer=request.user,
+            status='accepted',
+        ).select_related('listing')
+        for app in applications:
+            listing = app.listing
+            events.append({
+                'title': listing.title,
+                'start': f"{listing.event_date}T{listing.start_time}",
+                'color': '#059669',
+                'extendedProps': {
+                    'venue': listing.venue_name,
+                    'pay': str(listing.pay),
+                    'style': listing.get_preferred_style_display(),
+                },
+            })
+
+    return JsonResponse(events, safe=False)

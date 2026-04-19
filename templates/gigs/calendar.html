@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}My Calendar — GigBoard{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+    #calendar-container {
+        max-width: 1000px;
+        margin: 24px auto;
+        padding: 0 16px;
+    }
+    #calendar {
+        background: var(--card-bg, #fff);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .fc-event { cursor: pointer; }
+
+    /* Event detail modal */
+    #event-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    #event-modal.open { display: flex; }
+    #event-modal-inner {
+        background: var(--card-bg, #fff);
+        border-radius: 10px;
+        padding: 28px;
+        min-width: 320px;
+        max-width: 480px;
+        width: 90%;
+        position: relative;
+    }
+    #event-modal-close {
+        position: absolute;
+        top: 12px; right: 16px;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="calendar-container">
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">My Calendar</h1>
+    <div id="calendar"></div>
+</div>
+
+<!-- Event detail modal -->
+<div id="event-modal">
+    <div id="event-modal-inner">
+        <button id="event-modal-close" aria-label="Close">×</button>
+        <h2 id="modal-title" style="font-size: 18px; font-weight: 700; margin-bottom: 12px;"></h2>
+        <div id="modal-body" style="font-size: 14px; color: var(--text-secondary); line-height: 1.8;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const modal = document.getElementById('event-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listMonth',
+        },
+        events: '{% url "gigs:calendar_events" %}',
+        eventClick: function (info) {
+            const p = info.event.extendedProps;
+            modalTitle.textContent = info.event.title;
+            let rows = `
+                <div><strong>Date:</strong> ${info.event.start.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}</div>
+                <div><strong>Time:</strong> ${info.event.start.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}</div>
+                <div><strong>Venue:</strong> ${p.venue}</div>
+                <div><strong>Style:</strong> ${p.style}</div>
+                <div><strong>Pay:</strong> $${p.pay}</div>
+            `;
+            if (p.status) rows += `<div><strong>Status:</strong> ${p.status}</div>`;
+            if (p.performer) rows += `<div><strong>Performer:</strong> ${p.performer}</div>`;
+            modalBody.innerHTML = rows;
+            modal.classList.add('open');
+        },
+    });
+
+    calendar.render();
+
+    document.getElementById('event-modal-close').addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+});
+</script>
+{% endblock %}

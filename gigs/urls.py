@@ -7,5 +7,10 @@ urlpatterns = [
     path('', views.listing_list, name='listing_list'),
     path('create/', views.create_listing, name='create_listing'),
     path('mine/', views.my_listings, name='my_listings'),
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('calendar/events/', views.calendar_events, name='calendar_events'),
     path('<int:pk>/close/', views.close_listing, name='close_listing'),
+    path('<int:pk>/apply/', views.apply_to_gig, name='apply'),
+    path('<int:pk>/applications/', views.listing_applications, name='listing_applications'),
+    path('applications/<int:pk>/update/', views.update_application, name='update_application'),
 ]

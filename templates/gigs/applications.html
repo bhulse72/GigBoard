@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Applications — {{ listing.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 24px auto; padding: 0 16px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                Applications: {{ listing.title }}
+            </h1>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                {{ listing.venue_name }} · {{ listing.event_date }} at {{ listing.start_time }}
+            </p>
+        </div>
+        <a href="{% url 'gigs:my_listings' %}" class="btn-gc">← Back</a>
+    </div>
+
+    {% if applications %}
+        {% for app in applications %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">
+                            {{ app.performer.get_full_name|default:app.performer.username }}
+                            {% if app.performer.stage_name %}
+                                <span style="font-weight: 400; color: var(--text-muted);">({{ app.performer.stage_name }})</span>
+                            {% endif %}
+                        </div>
+                        {% if app.performer.music_style %}
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ app.performer.music_style }}</div>
+                        {% endif %}
+                        {% if app.message %}
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">{{ app.message }}</p>
+                        {% endif %}
+                        <div style="margin-top: 8px;">
+                            {% if app.status == 'pending' %}
+                                <span class="gc-tag">Pending</span>
+                            {% elif app.status == 'accepted' %}
+                                <span class="gc-tag" style="background: #d1fae5; color: #065f46;">Accepted</span>
+                            {% else %}
+                                <span class="gc-tag" style="background: #fee2e2; color: #991b1b;">Declined</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if app.status == 'pending' %}
+                        <div style="display: flex; gap: 8px; flex-shrink: 0; margin-left: 16px;">
+                            <form method="post" action="{% url 'gigs:update_application' app.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="accepted">
+                                <button type="submit" class="btn-gc btn-gc-filled">Accept</button>
+                            </form>
+                            <form method="post" action="{% url 'gigs:update_application' app.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="declined">
+                                <button type="submit" class="btn-gc">Decline</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted);">No applications yet.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
