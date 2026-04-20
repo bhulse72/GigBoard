@@ -6,67 +6,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GigBoard{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
     <nav class="navbar">
-        <div style="display: flex; align-items: center; gap: 24px;">
-            <a class="navbar-brand" href="/">GigBoard</a>
-            
-        </div>
-        <ul class="navbar-nav flex-row gap-2">
-            {% if user.is_authenticated and user.is_performer %}
+        <a class="navbar-brand" href="/">GigBoard</a>
+
+        <ul class="navbar-nav flex-row align-items-center gap-1">
+        {% if user.is_authenticated %}
+
+            {% if user.is_performer %}
+                <!-- Network -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'performers:directory' %}">Network</a>
+                    <a class="nav-link nav-icon-link" href="{% url 'performers:directory' %}" title="Network">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Network</span>
+                    </a>
+                </li>
+
+                <!-- Lessons dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-music-note-beamed"></i>
+                        <span>Lessons</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark-gc">
+                        <li><a class="dropdown-item-gc" href="{% url 'lessons:listing_list' %}"><i class="bi bi-search"></i> Browse Lessons</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'lessons:my_students' %}"><i class="bi bi-person-lines-fill"></i> My Students</a></li>
+                    </ul>
+                </li>
+
+                <!-- Find Gigs -->
+                <li class="nav-item">
+                    <a class="nav-link nav-icon-link" href="{% url 'gigs:listing_list' %}" title="Find Gigs">
+                        <i class="bi bi-lightning-fill"></i>
+                        <span>Find Gigs</span>
+                    </a>
+                </li>
+
+                <!-- Management dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Manage</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark-gc">
+                        <li><a class="dropdown-item-gc" href="{% url 'lessons:my_bookings' %}"><i class="bi bi-bookmark-check-fill"></i> My Bookings</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'gigs:calendar' %}"><i class="bi bi-calendar3"></i> Calendar</a></li>
+                    </ul>
                 </li>
             {% endif %}
-            {% if user.is_authenticated %}
-                {% if user.is_performer %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lessons:listing_list' %}">Lessons</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lessons:my_bookings' %}">My Bookings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lessons:my_students' %}">My Students</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'gigs:listing_list' %}">Find Gigs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'gigs:calendar' %}">Calendar</a>
-                    </li>
-                {% endif %}
-                {% if user.is_venue_owner or user.is_manager %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'venues:dashboard' %}">My Venues</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'gigs:my_listings' %}">My Gigs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'gigs:calendar' %}">Calendar</a>
-                    </li>
-                {% endif %}
+
+            {% if user.is_venue_owner or user.is_manager %}
+                <!-- My Venues -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
+                    <a class="nav-link nav-icon-link" href="{% url 'venues:dashboard' %}" title="My Venues">
+                        <i class="bi bi-building"></i>
+                        <span>My Venues</span>
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="nav-link border-0 bg-transparent p-0" style="cursor:pointer;">
-                            Logout
-                        </button>
-                    </form>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+
+                <!-- Management dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Manage</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark-gc">
+                        <li><a class="dropdown-item-gc" href="{% url 'gigs:my_listings' %}"><i class="bi bi-music-note-list"></i> My Gigs</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'gigs:calendar' %}"><i class="bi bi-calendar3"></i> Calendar</a></li>
+                    </ul>
                 </li>
             {% endif %}
+
+            <!-- Account dropdown (all roles) -->
+            <li class="nav-item dropdown">
+                <a class="nav-avatar-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    {{ user.username|slice:":2"|upper }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark-gc dropdown-menu-end">
+                    <li>
+                        <div class="dropdown-item-gc" style="cursor: default; opacity: 0.6; font-size: 11px;">
+                            {{ user.username }}
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider-gc"></li>
+                    <li><a class="dropdown-item-gc" href="{% url 'accounts:profile' %}"><i class="bi bi-person-fill"></i> Profile</a></li>
+                    <li>
+                        <form method="post" action="{% url 'accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item-gc w-100 text-start border-0 bg-transparent">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </li>
+
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link nav-icon-link" href="{% url 'accounts:login' %}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+        {% endif %}
         </ul>
     </nav>
 

@@ -246,6 +246,101 @@ textarea::placeholder {
     margin: 2px;
 }
 
+/* NAV ICONS + DROPDOWNS */
+.nav-icon-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px !important;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.nav-icon-link:hover {
+    background: var(--accent-subtle);
+}
+
+.nav-icon-link i {
+    font-size: 15px;
+}
+
+.nav-icon-link span {
+    font-size: 13px;
+}
+
+.dropdown-toggle::after {
+    margin-left: 3px;
+    vertical-align: middle;
+    border-top-color: var(--text-muted);
+}
+
+.dropdown-menu-dark-gc {
+    background: var(--bg-nav) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 6px !important;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+
+.dropdown-item-gc {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    background: transparent !important;
+}
+
+.dropdown-item-gc:hover,
+.dropdown-item-gc:focus {
+    background: var(--accent-subtle) !important;
+    color: var(--accent) !important;
+}
+
+.dropdown-item-gc i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.dropdown-divider-gc {
+    border-color: var(--border) !important;
+    margin: 4px 0;
+    opacity: 1 !important;
+}
+
+/* Account avatar button */
+.nav-avatar-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-left: 6px;
+    transition: background 0.15s;
+}
+
+.nav-avatar-btn::after {
+    display: none;
+}
+
+.nav-avatar-btn:hover {
+    background: var(--accent-dark);
+    color: #fff;
+}
+
 /* LINKS */
 a {
     color: var(--accent);
