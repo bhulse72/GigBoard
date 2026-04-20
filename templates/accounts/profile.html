@@ -109,6 +109,42 @@
                 <p style="font-size: 14px; color: var(--text-secondary);">{{ user.interests }}</p>
             </div>
             {% endif %}
+            {% if upcoming_gigs %}
+            <div class="gc-card gc-card-body mb-3">
+                <div class="gc-card-title">Upcoming Shows</div>
+                {% for app in upcoming_gigs %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ app.listing.title }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ app.listing.venue_name }}{% if app.listing.location %} · {{ app.listing.location }}{% endif %}</div>
+                        <span class="gc-tag" style="margin-top: 4px;">{{ app.listing.get_preferred_style_display }}</span>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
+                        <div style="font-size: 13px; color: var(--text-primary); font-weight: 500;">{{ app.listing.event_date }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">{{ app.listing.start_time }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if past_gigs %}
+            <div class="gc-card gc-card-body">
+                <div class="gc-card-title">Past Shows</div>
+                {% for app in past_gigs %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); opacity: 0.7;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ app.listing.title }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ app.listing.venue_name }}{% if app.listing.location %} · {{ app.listing.location }}{% endif %}</div>
+                        <span class="gc-tag" style="margin-top: 4px;">{{ app.listing.get_preferred_style_display }}</span>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
+                        <div style="font-size: 13px; color: var(--text-muted);">{{ app.listing.event_date }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
     </div>
