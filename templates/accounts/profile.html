@@ -3,75 +3,114 @@
 {% block title %}{{ user.username }} — GigBoard{% endblock %}
 
 {% block content %}
-<div class="page-layout">
+<div style="max-width: 860px; margin: 24px auto; padding: 0 16px;">
 
-    <!-- Left Sidebar -->
-    <div>
-        <div class="gc-card">
-            <div class="profile-banner"></div>
-            <div class="profile-avatar">
-                {{ user.username|slice:":2"|upper }}
-            </div>
-            <div class="gc-card-body">
-                <div class="profile-name">
-                    {% if user.get_full_name %}
-                        {{ user.get_full_name }}
-                    {% else %}
-                        {{ user.username }}
-                    {% endif %}
+    <!-- Profile Header Card -->
+    <div class="gc-card mb-4">
+        <div class="profile-banner" style="height: 120px;"></div>
+        <div style="padding: 0 24px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
+                <div class="profile-avatar" style="width: 88px; height: 88px; font-size: 30px; margin: -44px 0 0 0;">
+                    {{ user.username|slice:":2"|upper }}
                 </div>
-                <span class="profile-role-badge">{{ user.get_role_display }}</span>
-                {% if user.location %}
-                    <div class="profile-location">{{ user.location }}</div>
-                {% endif %}
-                {% if user.bio %}
-                    <div class="profile-bio mt-2">{{ user.bio }}</div>
-                {% endif %}
-                <hr class="profile-divider">
-                <a href="{% url 'accounts:edit_profile' %}" class="btn-gc w-100 text-center d-block">
+                <a href="{% url 'accounts:edit_profile' %}" class="btn-gc" style="margin-bottom: 4px;">
                     Edit Profile
                 </a>
             </div>
+
+            <!-- Name + role -->
+            <div style="font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1.2;">
+                {% if user.stage_name %}{{ user.stage_name }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+            </div>
+            {% if user.stage_name and user.get_full_name %}
+                <div style="font-size: 14px; color: var(--text-muted); margin-top: 2px;">{{ user.get_full_name }}</div>
+            {% endif %}
+
+            <div style="margin-top: 6px;">
+                <span class="profile-role-badge">{{ user.get_role_display }}</span>
+            </div>
+
+            {% if user.location %}
+                <div class="profile-location" style="margin-top: 6px;">{{ user.location }}</div>
+            {% endif %}
+
+            {% if user.bio %}
+                <p style="font-size: 14px; color: var(--text-secondary); margin-top: 10px; max-width: 600px;">{{ user.bio }}</p>
+            {% endif %}
+
+            <!-- Music style tags -->
+            {% if user.music_style %}
+                <div style="margin-top: 10px;">
+                    {% for style in user.music_style.split %}
+                        <span class="gc-tag">{{ style|cut:"," }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Social links -->
+            {% if user.soundcloud_url or user.instagram_url or user.spotify_url %}
+                <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                    {% if user.soundcloud_url %}
+                        <a href="{{ user.soundcloud_url }}" target="_blank" rel="noopener" class="btn-gc" style="font-size: 12px;">SoundCloud</a>
+                    {% endif %}
+                    {% if user.spotify_url %}
+                        <a href="{{ user.spotify_url }}" target="_blank" rel="noopener" class="btn-gc" style="font-size: 12px;">Spotify</a>
+                    {% endif %}
+                    {% if user.instagram_url %}
+                        <a href="{{ user.instagram_url }}" target="_blank" rel="noopener" class="btn-gc" style="font-size: 12px;">Instagram</a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div>
+    <!-- Lower two-column section -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start;">
+
+        <!-- Left: Account Details -->
         <div class="gc-card gc-card-body">
             <div class="gc-card-title">Account Details</div>
-            <table class="w-100" style="font-size: 14px; border-collapse: collapse;">
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 10px 0; color: var(--text-muted); width: 140px;">Username</td>
-                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.username }}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 10px 0; color: var(--text-muted);">Email</td>
-                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.email|default:"Not set" }}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 10px 0; color: var(--text-muted);">Full Name</td>
-                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.get_full_name|default:"Not set" }}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid var(--border);">
-                    <td style="padding: 10px 0; color: var(--text-muted);">Location</td>
-                    <td style="padding: 10px 0; color: var(--text-primary);">{{ user.location|default:"Not set" }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; color: var(--text-muted);">Role</td>
-                    <td style="padding: 10px 0;">
-                        <span class="gc-tag">{{ user.get_role_display }}</span>
-                    </td>
-                </tr>
-            </table>
+            <div style="font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 2px;">Username</div>
+                    <div style="color: var(--text-primary);">{{ user.username }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 2px;">Email</div>
+                    <div style="color: var(--text-primary);">{{ user.email|default:"Not set" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 2px;">Full Name</div>
+                    <div style="color: var(--text-primary);">{{ user.get_full_name|default:"Not set" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 2px;">Location</div>
+                    <div style="color: var(--text-primary);">{{ user.location|default:"Not set" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 2px;">Role</div>
+                    <span class="gc-tag">{{ user.get_role_display }}</span>
+                </div>
+            </div>
         </div>
 
-        {% if user.bio %}
-        <div class="gc-card gc-card-body">
-            <div class="gc-card-title">About</div>
-            <p style="font-size: 14px; color: var(--text-secondary);">{{ user.bio }}</p>
+        <!-- Right: About + Interests -->
+        <div>
+            {% if user.bio %}
+            <div class="gc-card gc-card-body mb-3">
+                <div class="gc-card-title">About</div>
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">{{ user.bio }}</p>
+            </div>
+            {% endif %}
+
+            {% if user.interests %}
+            <div class="gc-card gc-card-body">
+                <div class="gc-card-title">Interests</div>
+                <p style="font-size: 14px; color: var(--text-secondary);">{{ user.interests }}</p>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+
     </div>
-
 </div>
 {% endblock %}
