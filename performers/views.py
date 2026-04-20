@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -63,6 +64,38 @@ def send_collab_request(request, user_id):
     return render(request, 'performers/send_request.html', {
         'form': form,
         'receiver': receiver,
+    })
+
+
+@login_required
+def performer_browser(request):
+    if not (request.user.is_venue_owner() or request.user.is_manager()):
+        messages.error(request, 'Only venue owners and managers can browse performers.')
+        return redirect('accounts:profile')
+
+    performers = User.objects.filter(role='performer')
+
+    location = request.GET.get('location', '').strip()
+    style = request.GET.get('style', '').strip()
+    name = request.GET.get('name', '').strip()
+
+    if name:
+        performers = performers.filter(
+            models.Q(stage_name__icontains=name) |
+            models.Q(first_name__icontains=name) |
+            models.Q(last_name__icontains=name) |
+            models.Q(username__icontains=name)
+        )
+    if location:
+        performers = performers.filter(location__icontains=location)
+    if style:
+        performers = performers.filter(music_style__icontains=style)
+
+    return render(request, 'performers/browse.html', {
+        'performers': performers,
+        'location': location,
+        'style': style,
+        'name': name,
     })
 
 

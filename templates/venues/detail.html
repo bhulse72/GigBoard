@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ venue.name }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Header card -->
+    <div class="gc-card gc-card-body mb-4">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+                    {{ venue.name }}
+                </h1>
+
+                {% if venue.city or venue.state %}
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        {{ venue.city }}{% if venue.city and venue.state %}, {% endif %}{{ venue.state }}
+                        {% if venue.address %} · {{ venue.address }}{% endif %}
+                    </div>
+                {% endif %}
+
+                {% if venue.capacity %}
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                        <i class="bi bi-people-fill"></i> Capacity: {{ venue.capacity }}
+                    </div>
+                {% endif %}
+
+                {% if venue.genre_tags %}
+                    <div style="margin-bottom: 10px;">
+                        {% for tag in venue.genre_tags.split %}
+                            <span class="gc-tag">{{ tag|cut:"," }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if venue.description %}
+                    <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 560px;">
+                        {{ venue.description }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- External links -->
+            <div style="display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+                {% if venue.website %}
+                    <a href="{{ venue.website }}" target="_blank" rel="noopener" class="btn-gc" style="font-size: 12px; text-align: center;">
+                        <i class="bi bi-globe"></i> Website
+                    </a>
+                {% endif %}
+                {% if venue.instagram %}
+                    <a href="{{ venue.instagram }}" target="_blank" rel="noopener" class="btn-gc" style="font-size: 12px; text-align: center;">
+                        <i class="bi bi-instagram"></i> Instagram
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Open Gig Listings -->
+    <h2 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+        Open Gig Listings
+    </h2>
+
+    {% if open_listings %}
+        {% for listing in open_listings %}
+        <div class="gc-card gc-card-body mb-3">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+                <div>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                        {{ listing.title }}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                        {{ listing.event_date }} at {{ listing.start_time }}
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="gc-tag">{{ listing.get_preferred_style_display }}</span>
+                        <span class="gc-tag">${{ listing.pay }}</span>
+                    </div>
+                    {% if listing.description %}
+                        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">{{ listing.description }}</p>
+                    {% endif %}
+                </div>
+
+                <div style="flex-shrink: 0; text-align: right;">
+                    {% if user.is_performer %}
+                        {% if listing.id in user_applications %}
+                            {% with status=user_applications|get_item:listing.id %}
+                                {% if status == 'accepted' %}
+                                    <span class="gc-tag" style="background: #d1fae5; color: #065f46;">Accepted</span>
+                                {% elif status == 'declined' %}
+                                    <span class="gc-tag" style="background: #fee2e2; color: #991b1b;">Declined</span>
+                                {% else %}
+                                    <span class="gc-tag">Applied</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <a href="{% url 'gigs:apply' listing.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                                Apply
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 32px;">
+            <p style="color: var(--text-muted);">No open gig listings right now.</p>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 16px;">
+        <a href="{% url 'venues:browse' %}" class="btn-gc" style="font-size: 13px;">← Back to Venues</a>
+    </div>
+
+</div>
+{% endblock %}

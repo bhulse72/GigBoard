@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Performers — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 960px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">Browse Performers</h1>
+
+    <!-- Filters -->
+    <div class="gc-card gc-card-body mb-4">
+        <form method="get" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 160px;">
+                <label>Name / Stage Name</label>
+                <input type="text" name="name" value="{{ name }}" placeholder="e.g. DJ Solara" class="form-control mt-1">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <label>Location</label>
+                <input type="text" name="location" value="{{ location }}" placeholder="e.g. Chicago" class="form-control mt-1">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <label>Music Style</label>
+                <input type="text" name="style" value="{{ style }}" placeholder="e.g. House, Hip Hop" class="form-control mt-1">
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn-gc btn-gc-filled">Search</button>
+                {% if name or location or style %}
+                    <a href="{% url 'performers:browse' %}" class="btn-gc">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        {{ performers.count }} performer{{ performers.count|pluralize }} found
+    </div>
+
+    {% if performers %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            {% for performer in performers %}
+            <div class="gc-card gc-card-body" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--accent);
+                                display: flex; align-items: center; justify-content: center;
+                                font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;">
+                        {{ performer.username|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">
+                            {{ performer.stage_name|default:performer.get_full_name|default:performer.username }}
+                        </div>
+                        {% if performer.stage_name and performer.get_full_name %}
+                            <div style="font-size: 12px; color: var(--text-muted);">{{ performer.get_full_name }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if performer.location %}
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <i class="bi bi-geo-alt-fill"></i> {{ performer.location }}
+                    </div>
+                {% endif %}
+
+                {% if performer.music_style %}
+                    <div>
+                        {% for style in performer.music_style.split %}
+                            <span class="gc-tag">{{ style|cut:"," }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if performer.bio %}
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                        {{ performer.bio|truncatechars:100 }}
+                    </p>
+                {% endif %}
+
+                <div style="margin-top: auto; padding-top: 8px;">
+                    <a href="{% url 'performers:profile' performer.id %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted);">No performers found matching your search.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

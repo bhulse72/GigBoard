@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Venue, VenueManager
 from .forms import VenueForm
-from gigs.models import GigListing
+from gigs.models import GigListing, GigApplication
 
 
 def can_manage_venue(user, venue):
@@ -98,3 +98,52 @@ def manage_venue(request, pk):
     request.session['active_venue_name'] = venue.name
     gig_listings = GigListing.objects.filter(venue=venue).order_by('-event_date')
     return render(request, 'venues/manage.html', {'venue': venue, 'gig_listings': gig_listings})
+
+
+@login_required
+def venue_browser(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can browse venues.')
+        return redirect('accounts:profile')
+
+    venues = Venue.objects.all()
+
+    location = request.GET.get('location', '').strip()
+    genre = request.GET.get('genre', '').strip()
+    open_only = request.GET.get('open_only', '')
+
+    if location:
+        venues = venues.filter(city__icontains=location) | venues.filter(state__icontains=location)
+    if genre:
+        venues = venues.filter(genre_tags__icontains=genre)
+    if open_only:
+        venues = venues.filter(gig_listings__is_open=True).distinct()
+
+    venues = venues.order_by('name')
+
+    return render(request, 'venues/browse.html', {
+        'venues': venues,
+        'location': location,
+        'genre': genre,
+        'open_only': open_only,
+    })
+
+
+@login_required
+def venue_detail(request, pk):
+    venue = get_object_or_404(Venue, pk=pk)
+    open_listings = GigListing.objects.filter(venue=venue, is_open=True).order_by('event_date')
+
+    user_applications = {}
+    if request.user.is_performer():
+        apps = GigApplication.objects.filter(
+            performer=request.user,
+            listing__in=open_listings
+        ).values_list('listing_id', 'status')
+        user_applications = dict(apps)
+
+    return render(request, 'venues/detail.html', {
+        'venue': venue,
+        'open_listings': open_listings,
+        'user_applications': user_applications,
+    })

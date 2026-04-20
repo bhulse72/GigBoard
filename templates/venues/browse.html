@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Venues — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 960px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">Browse Venues</h1>
+
+    <!-- Filters -->
+    <div class="gc-card gc-card-body mb-4">
+        <form method="get" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 160px;">
+                <label>City / State</label>
+                <input type="text" name="location" value="{{ location }}" placeholder="e.g. Chicago" class="form-control mt-1">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <label>Genre</label>
+                <input type="text" name="genre" value="{{ genre }}" placeholder="e.g. House, Hip Hop" class="form-control mt-1">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 2px;">
+                <input type="checkbox" name="open_only" id="open_only" value="1" {% if open_only %}checked{% endif %}
+                       style="width: 16px; height: 16px; accent-color: var(--accent);">
+                <label for="open_only" style="margin: 0; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                    Open gigs only
+                </label>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn-gc btn-gc-filled">Search</button>
+                {% if location or genre or open_only %}
+                    <a href="{% url 'venues:browse' %}" class="btn-gc">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        {{ venues.count }} venue{{ venues.count|pluralize }} found
+    </div>
+
+    {% if venues %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            {% for venue in venues %}
+            <div class="gc-card gc-card-body" style="display: flex; flex-direction: column; gap: 8px;">
+
+                <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ venue.name }}</div>
+
+                {% if venue.city or venue.state %}
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        {{ venue.city }}{% if venue.city and venue.state %}, {% endif %}{{ venue.state }}
+                    </div>
+                {% endif %}
+
+                {% if venue.capacity %}
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <i class="bi bi-people-fill"></i> Capacity: {{ venue.capacity }}
+                    </div>
+                {% endif %}
+
+                {% if venue.genre_tags %}
+                    <div>
+                        {% for tag in venue.genre_tags.split %}
+                            <span class="gc-tag">{{ tag|cut:"," }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if venue.description %}
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                        {{ venue.description|truncatechars:100 }}
+                    </p>
+                {% endif %}
+
+                <!-- Open gig count -->
+                {% with open_count=venue.gig_listings.all|length %}
+                    {% if open_count > 0 %}
+                        <div style="font-size: 12px; color: #34d399; font-weight: 500;">
+                            <i class="bi bi-lightning-fill"></i> {{ open_count }} open gig{{ open_count|pluralize }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div style="margin-top: auto; padding-top: 8px;">
+                    <a href="{% url 'venues:detail' venue.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                        View Venue
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted);">No venues found matching your search.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
