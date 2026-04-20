@@ -22,6 +22,10 @@ class User(AbstractUser):
     music_style = models.CharField(max_length=100, blank=True)
     interests = models.CharField(max_length=255, blank=True)
 
+    instagram_url = models.CharField(max_length=255, blank=True, default='')
+    soundcloud_url = models.CharField(max_length=255, blank=True, default='')
+    spotify_url = models.CharField(max_length=255, blank=True, default='')
+
     def is_venue_owner(self):
         return self.role == self.Role.VENUE_OWNER
 
