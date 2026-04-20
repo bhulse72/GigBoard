@@ -19,6 +19,20 @@
                             <div class="mt-2">
                                 <span class="gc-tag">{{ req.get_status_display }}</span>
                             </div>
+
+                            {% if req.status == 'pending' %}
+                                <div class="d-flex gap-2 mt-3">
+                                    <form method="post" action="{% url 'performers:accept_request' req.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-gc btn-gc-filled">Accept</button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'performers:decline_request' req.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-gc">Decline</button>
+                                    </form>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}

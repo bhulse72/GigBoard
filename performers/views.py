@@ -105,3 +105,35 @@ def my_requests(request):
         'incoming_requests': incoming_requests,
         'outgoing_requests': outgoing_requests,
     })
+
+@login_required
+def accept_collab_request(request, request_id):
+    collab_request = get_object_or_404(
+        CollaborationRequest,
+        id=request_id,
+        receiver=request.user,
+    )
+
+    if request.method == 'POST':
+        if collab_request.status == CollaborationRequest.Status.PENDING:
+            collab_request.status = CollaborationRequest.Status.ACCEPTED
+            collab_request.save()
+            messages.success(request, 'Collaboration request accepted.')
+
+    return redirect('performers:requests')
+
+@login_required
+def decline_collab_request(request, request_id):
+    collab_request = get_object_or_404(
+        CollaborationRequest,
+        id=request_id,
+        receiver=request.user,
+    )
+
+    if request.method == 'POST':
+        if collab_request.status == CollaborationRequest.Status.PENDING:
+            collab_request.status = CollaborationRequest.Status.DECLINED
+            collab_request.save()
+            messages.success(request, 'Collaboration request declined.')
+    
+    return redirect('performers:requests')
