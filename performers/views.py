@@ -1,8 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from accounts.models import User
+from gigs.models import GigApplication
 from .forms import CollaborationRequestForm
 from .models import CollaborationRequest
 
@@ -61,6 +63,32 @@ def send_collab_request(request, user_id):
     return render(request, 'performers/send_request.html', {
         'form': form,
         'receiver': receiver,
+    })
+
+
+@login_required
+def performer_profile(request, user_id):
+    performer = get_object_or_404(User, id=user_id, role='performer')
+    today = timezone.now().date()
+
+    accepted_gigs = GigApplication.objects.filter(
+        performer=performer, status='accepted'
+    ).select_related('listing').order_by('listing__event_date')
+
+    upcoming_gigs = [a for a in accepted_gigs if a.listing.event_date >= today]
+    past_gigs = [a for a in accepted_gigs if a.listing.event_date < today]
+
+    already_sent = False
+    if request.user.is_performer() and request.user != performer:
+        already_sent = CollaborationRequest.objects.filter(
+            sender=request.user, receiver=performer
+        ).exists()
+
+    return render(request, 'performers/profile.html', {
+        'performer': performer,
+        'upcoming_gigs': upcoming_gigs,
+        'past_gigs': past_gigs,
+        'already_sent': already_sent,
     })
 
 

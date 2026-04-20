@@ -46,9 +46,14 @@
                                 </p>
                             {% endif %}
 
-                            <a href="{% url 'performers:send_request' performer.id %}" class="btn-gc btn-gc-filled mt-2">
-                                Send Collaboration Request
-                            </a>
+                            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                                <a href="{% url 'performers:profile' performer.id %}" class="btn-gc">
+                                    View Profile
+                                </a>
+                                <a href="{% url 'performers:send_request' performer.id %}" class="btn-gc btn-gc-filled">
+                                    Collab Request
+                                </a>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

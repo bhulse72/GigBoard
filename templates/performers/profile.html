@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ performer.stage_name|default:performer.username }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Header -->
+    <div class="gc-card gc-card-body mb-4">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;">
+            <div>
+                <h1 style="font-size: 26px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                    {{ performer.stage_name|default:performer.username }}
+                </h1>
+                {% if performer.stage_name %}
+                    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">
+                        {{ performer.get_full_name }}
+                    </div>
+                {% endif %}
+
+                {% if performer.location %}
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+                        {{ performer.location }}
+                    </div>
+                {% endif %}
+
+                {% if performer.music_style %}
+                    <div style="margin-bottom: 12px;">
+                        {% for style in performer.music_style.split %}
+                            <span class="gc-tag">{{ style|cut:"," }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if performer.bio %}
+                    <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 540px;">
+                        {{ performer.bio }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; min-width: 160px; align-items: flex-end;">
+                {% if user.is_performer and user != performer %}
+                    {% if already_sent %}
+                        <span class="gc-tag">Request Sent</span>
+                    {% else %}
+                        <a href="{% url 'performers:send_request' performer.id %}" class="btn-gc btn-gc-filled">
+                            Collab Request
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Social links -->
+                {% if performer.soundcloud_url %}
+                    <a href="{{ performer.soundcloud_url }}" target="_blank" rel="noopener"
+                       class="btn-gc" style="font-size: 12px; width: 100%; text-align: center;">
+                        SoundCloud
+                    </a>
+                {% endif %}
+                {% if performer.spotify_url %}
+                    <a href="{{ performer.spotify_url }}" target="_blank" rel="noopener"
+                       class="btn-gc" style="font-size: 12px; width: 100%; text-align: center;">
+                        Spotify
+                    </a>
+                {% endif %}
+                {% if performer.instagram_url %}
+                    <a href="{{ performer.instagram_url }}" target="_blank" rel="noopener"
+                       class="btn-gc" style="font-size: 12px; width: 100%; text-align: center;">
+                        Instagram
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Gigs -->
+    <h2 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+        Upcoming Shows
+    </h2>
+    {% if upcoming_gigs %}
+        {% for app in upcoming_gigs %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">
+                            {{ app.listing.title }}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                            {{ app.listing.venue_name }}{% if app.listing.location %} · {{ app.listing.location }}{% endif %}
+                        </div>
+                        <div style="margin-top: 6px;">
+                            <span class="gc-tag">{{ app.listing.get_preferred_style_display }}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0;">
+                        <div style="font-size: 13px; color: var(--text-primary); font-weight: 500;">
+                            {{ app.listing.event_date }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            {{ app.listing.start_time }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body mb-4" style="color: var(--text-muted); text-align: center; padding: 24px;">
+            No upcoming shows booked.
+        </div>
+    {% endif %}
+
+    <!-- Past Gigs -->
+    {% if past_gigs %}
+        <h2 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 24px 0 12px;">
+            Past Shows
+        </h2>
+        {% for app in past_gigs %}
+            <div class="gc-card gc-card-body mb-3" style="opacity: 0.75;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">
+                            {{ app.listing.title }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                            {{ app.listing.venue_name }}{% if app.listing.location %} · {{ app.listing.location }}{% endif %}
+                        </div>
+                        <span class="gc-tag" style="margin-top: 6px; display: inline-block;">
+                            {{ app.listing.get_preferred_style_display }}
+                        </span>
+                    </div>
+                    <div style="text-align: right; font-size: 12px; color: var(--text-muted);">
+                        {{ app.listing.event_date }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

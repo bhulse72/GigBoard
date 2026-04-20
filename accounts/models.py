@@ -21,6 +21,9 @@ class User(AbstractUser):
     stage_name = models.CharField(max_length=100, blank=True)
     music_style = models.CharField(max_length=100, blank=True)
     interests = models.CharField(max_length=255, blank=True)
+    soundcloud_url = models.URLField(blank=True)
+    instagram_url = models.URLField(blank=True)
+    spotify_url = models.URLField(blank=True)
 
     def is_venue_owner(self):
         return self.role == self.Role.VENUE_OWNER
