@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from .forms import EditProfileForm
+from reviews.utils import generate_gig_notifications
 
 @login_required
 def profile(request):
+    generate_gig_notifications(request.user)
     context = {}
     today = timezone.now().date()
 

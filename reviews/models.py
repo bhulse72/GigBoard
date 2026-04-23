@@ -94,3 +94,36 @@ class Review(models.Model):
     def __str__(self):
         target = self.reviewed_performer or self.reviewed_venue
         return f"{self.reviewer} → {target} ({self.rating}★)"
+
+
+class Notification(models.Model):
+    VERIFY_GIG = 'verify_gig'
+    LEAVE_REVIEW = 'leave_review'
+    TYPE_CHOICES = [
+        (VERIFY_GIG, 'Verify Gig Completion'),
+        (LEAVE_REVIEW, 'Leave a Review'),
+    ]
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    notification_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    related_application = models.ForeignKey(
+        'gigs.GigApplication',
+        null=True, blank=True,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # One notification of each type per recipient per gig application
+        unique_together = ('recipient', 'notification_type', 'related_application')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.recipient} — {self.notification_type}"
