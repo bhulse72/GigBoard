@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if existing_review %}Edit Review{% else %}Leave a Review{% endif %} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 560px; margin: 40px auto; padding: 0 16px;">
+    <div class="gc-card gc-card-body">
+        <div class="gc-card-title" style="margin-bottom: 4px;">
+            {% if existing_review %}Edit Your Review{% else %}Leave a Review{% endif %}
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+            {{ subject_type|capfirst }}: <strong>{{ subject_name }}</strong>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.title.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Rating (0.0 – 5.0)</label>
+                {{ form.rating }}
+                {% if form.rating.errors %}<div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.rating.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Review</label>
+                {{ form.body }}
+                {% if form.body.errors %}<div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.body.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-gc btn-gc-filled">
+                    {% if existing_review %}Update Review{% else %}Submit Review{% endif %}
+                </button>
+                <a href="javascript:history.back()" class="btn-gc">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

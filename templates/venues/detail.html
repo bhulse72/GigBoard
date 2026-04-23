@@ -111,6 +111,77 @@
         </div>
     {% endif %}
 
+    <!-- Reviews -->
+    <div class="gc-card gc-card-body mb-4" style="margin-top: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <div class="gc-card-title" style="margin-bottom: 4px;">Reviews</div>
+                {% if avg_rating %}
+                    <div style="font-size: 22px; font-weight: 700; color: var(--text-primary);">
+                        &#9733; {{ avg_rating|floatformat:1 }}
+                        <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">/ 5.0 &nbsp;({{ reviews|length }} review{{ reviews|length|pluralize }})</span>
+                    </div>
+                {% else %}
+                    <div style="font-size: 14px; color: var(--text-muted);">No reviews yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% for review in reviews %}
+        <div style="padding: 14px 0; border-top: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ review.title }}</span>
+                    {% if review.is_edited %}
+                        <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">Edited</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                    <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">&#9733; {{ review.rating }}</span>
+                    {% if review.reviewer == user %}
+                        <a href="{% url 'reviews:review_venue' venue.id %}" style="font-size: 12px; color: var(--text-muted);">Edit</a>
+                        <form method="post" action="{% url 'reviews:delete_review' review.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="font-size: 12px; color: #ef4444; background: none; border: none; cursor: pointer; padding: 0;">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 6px;">{{ review.body }}</p>
+            <div style="font-size: 11px; color: var(--text-muted);">
+                {{ review.reviewer.stage_name|default:review.reviewer.username }} &middot; {{ review.get_reviewer_role_display }}
+                &middot; {{ review.created_at|date:"M j, Y" }}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if can_review %}
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+                {% if existing_review %}Edit Your Review{% else %}Leave a Review{% endif %}
+            </div>
+            <form method="post" action="{% url 'reviews:review_venue' venue.id %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 10px;">
+                    {{ review_form.title }}
+                    {% if review_form.title.errors %}<div style="font-size:12px;color:#ef4444;">{{ review_form.title.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    {{ review_form.rating }}
+                    {% if review_form.rating.errors %}<div style="font-size:12px;color:#ef4444;">{{ review_form.rating.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div style="margin-bottom: 12px;">
+                    {{ review_form.body }}
+                    {% if review_form.body.errors %}<div style="font-size:12px;color:#ef4444;">{{ review_form.body.errors|join:", " }}</div>{% endif %}
+                </div>
+                <button type="submit" class="btn-gc btn-gc-filled" style="font-size: 13px;">
+                    {% if existing_review %}Update Review{% else %}Submit Review{% endif %}
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
     <div style="margin-top: 16px;">
         <a href="{% url 'venues:browse' %}" class="btn-gc" style="font-size: 13px;">← Back to Venues</a>
     </div>

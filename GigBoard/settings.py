@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'core',
     'fans',
     'lessons.apps.LessonsConfig',
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [
