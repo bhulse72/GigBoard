@@ -41,18 +41,6 @@ def select_venue(request, pk):
 
 
 @login_required
-def manage_venue(request, pk):
-    """Main management page for a specific venue."""
-    venue = get_object_or_404(Venue, pk=pk)
-    if not can_manage_venue(request.user, venue):
-        messages.error(request, 'You do not have access to that venue.')
-        return redirect('venues:dashboard')
-    request.session['active_venue_id'] = venue.pk
-    request.session['active_venue_name'] = venue.name
-    return render(request, 'venues/manage.html', {'venue': venue})
-
-
-@login_required
 def create_venue(request):
     """Venue owners can create a new venue."""
     if not request.user.is_venue_owner():
@@ -90,14 +78,25 @@ def edit_venue(request, pk):
 
 @login_required
 def manage_venue(request, pk):
+    from django.utils import timezone
     venue = get_object_or_404(Venue, pk=pk)
     if not can_manage_venue(request.user, venue):
         messages.error(request, 'You do not have access to that venue.')
         return redirect('venues:dashboard')
     request.session['active_venue_id'] = venue.pk
     request.session['active_venue_name'] = venue.name
+    today = timezone.now().date()
     gig_listings = GigListing.objects.filter(venue=venue).order_by('-event_date')
-    return render(request, 'venues/manage.html', {'venue': venue, 'gig_listings': gig_listings})
+    past_gigs = GigApplication.objects.filter(
+        listing__venue=venue,
+        status='accepted',
+        listing__event_date__lt=today,
+    ).select_related('listing', 'performer').order_by('-listing__event_date')
+    return render(request, 'venues/manage.html', {
+        'venue': venue,
+        'gig_listings': gig_listings,
+        'past_gigs': past_gigs,
+    })
 
 
 @login_required
