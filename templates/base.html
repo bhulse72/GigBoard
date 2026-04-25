@@ -99,6 +99,28 @@
                 </li>
             {% endif %}
 
+            <!-- Notifications bell (all roles) -->
+            <li class="nav-item">
+                <a class="nav-link nav-icon-link" href="{% url 'reviews:notifications' %}" title="Notifications" style="position: relative;">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Inbox</span>
+                    {% if unread_notification_count %}
+                        <span style="
+                            position: absolute;
+                            top: 2px; right: 2px;
+                            background: #ef4444;
+                            color: #fff;
+                            font-size: 10px;
+                            font-weight: 700;
+                            width: 16px; height: 16px;
+                            border-radius: 50%;
+                            display: flex; align-items: center; justify-content: center;
+                            line-height: 1;
+                        ">{{ unread_notification_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
             <!-- Account dropdown (all roles) -->
             <li class="nav-item dropdown">
                 <a class="nav-avatar-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

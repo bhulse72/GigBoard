@@ -3,9 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils import timezone
 from .models import GigListing, GigApplication
 from .forms import GigListingForm
-from venues.models import Venue
+from venues.models import Venue, VenueManager
 
 
 @login_required
@@ -122,6 +123,46 @@ def update_application(request, pk):
         application.save()
         messages.success(request, f'Application {new_status}.')
     return redirect('gigs:listing_applications', pk=application.listing.pk)
+
+
+@login_required
+def verify_gig_completion(request, pk):
+    if request.method != 'POST':
+        return redirect('accounts:profile')
+
+    app = get_object_or_404(GigApplication, pk=pk)
+    today = timezone.now().date()
+
+    if app.listing.event_date >= today:
+        messages.error(request, 'This gig has not yet taken place.')
+    elif request.user.is_performer() and app.performer == request.user:
+        if not app.performer_verified_complete:
+            app.performer_verified_complete = True
+            app.save()
+            messages.success(request, 'Gig marked as complete on your end.')
+        else:
+            messages.info(request, 'You have already verified this gig.')
+    elif request.user.is_venue_owner() or request.user.is_manager():
+        can_verify = (
+            (request.user.is_venue_owner() and app.listing.venue and app.listing.venue.owner == request.user) or
+            (request.user.is_manager() and VenueManager.objects.filter(user=request.user, venue=app.listing.venue).exists())
+        )
+        if can_verify:
+            if not app.venue_verified_complete:
+                app.venue_verified_complete = True
+                app.save()
+                messages.success(request, 'Gig marked as complete.')
+            else:
+                messages.info(request, 'You have already verified this gig.')
+        else:
+            messages.error(request, 'You do not have permission to verify this gig.')
+    else:
+        messages.error(request, 'You do not have permission to verify this gig.')
+
+    next_url = request.POST.get('next', '')
+    if next_url:
+        return redirect(next_url)
+    return redirect('accounts:profile')
 
 
 @login_required

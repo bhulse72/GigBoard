@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Avg
 from .models import Venue, VenueManager
 from .forms import VenueForm
 from gigs.models import GigListing, GigApplication
+from reviews.models import Review
+from reviews.forms import ReviewForm
 
 
 def can_manage_venue(user, venue):
@@ -38,18 +41,6 @@ def select_venue(request, pk):
     request.session['active_venue_id'] = venue.pk
     request.session['active_venue_name'] = venue.name
     return redirect('venues:manage', pk=venue.pk)
-
-
-@login_required
-def manage_venue(request, pk):
-    """Main management page for a specific venue."""
-    venue = get_object_or_404(Venue, pk=pk)
-    if not can_manage_venue(request.user, venue):
-        messages.error(request, 'You do not have access to that venue.')
-        return redirect('venues:dashboard')
-    request.session['active_venue_id'] = venue.pk
-    request.session['active_venue_name'] = venue.name
-    return render(request, 'venues/manage.html', {'venue': venue})
 
 
 @login_required
@@ -90,14 +81,25 @@ def edit_venue(request, pk):
 
 @login_required
 def manage_venue(request, pk):
+    from django.utils import timezone
     venue = get_object_or_404(Venue, pk=pk)
     if not can_manage_venue(request.user, venue):
         messages.error(request, 'You do not have access to that venue.')
         return redirect('venues:dashboard')
     request.session['active_venue_id'] = venue.pk
     request.session['active_venue_name'] = venue.name
+    today = timezone.now().date()
     gig_listings = GigListing.objects.filter(venue=venue).order_by('-event_date')
-    return render(request, 'venues/manage.html', {'venue': venue, 'gig_listings': gig_listings})
+    past_gigs = GigApplication.objects.filter(
+        listing__venue=venue,
+        status='accepted',
+        listing__event_date__lt=today,
+    ).select_related('listing', 'performer').order_by('-listing__event_date')
+    return render(request, 'venues/manage.html', {
+        'venue': venue,
+        'gig_listings': gig_listings,
+        'past_gigs': past_gigs,
+    })
 
 
 @login_required
@@ -142,8 +144,49 @@ def venue_detail(request, pk):
         ).values_list('listing_id', 'status')
         user_applications = dict(apps)
 
+    # Reviews
+    reviews = Review.objects.filter(
+        reviewed_venue=venue
+    ).select_related('reviewer', 'reviewing_venue').order_by('-created_at')
+
+    avg_rating = reviews.aggregate(avg=Avg('rating'))['avg']
+
+    can_review = False
+    existing_review = None
+    review_form = None
+
+    if request.user.is_fan():
+        can_review = True
+        existing_review = Review.objects.filter(
+            reviewer=request.user,
+            reviewed_venue=venue,
+        ).first()
+
+    elif request.user.is_performer():
+        has_completed_gig = GigApplication.objects.filter(
+            listing__venue=venue,
+            performer=request.user,
+            status='accepted',
+            venue_verified_complete=True,
+            performer_verified_complete=True,
+        ).exists()
+        if has_completed_gig:
+            can_review = True
+            existing_review = Review.objects.filter(
+                reviewer=request.user,
+                reviewed_venue=venue,
+            ).first()
+
+    if can_review:
+        review_form = ReviewForm(instance=existing_review)
+
     return render(request, 'venues/detail.html', {
         'venue': venue,
         'open_listings': open_listings,
         'user_applications': user_applications,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'can_review': can_review,
+        'existing_review': existing_review,
+        'review_form': review_form,
     })

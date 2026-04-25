@@ -84,6 +84,45 @@
                 {% endif %}
             </div>
         </div>
+
+            {% if past_gigs %}
+            <div class="gc-card gc-card-body" style="margin-top: 16px;">
+                <div class="gc-card-title">Past Gigs</div>
+                {% for app in past_gigs %}
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ app.listing.title }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                            {{ app.performer.stage_name|default:app.performer.username }}
+                        </div>
+                        <span class="gc-tag" style="margin-top: 4px;">{{ app.listing.get_preferred_style_display }}</span>
+                        {% if not app.is_verified_complete %}
+                            <div style="font-size: 11px; color: #b45309; margin-top: 6px;">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Completion unverified
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">{{ app.listing.event_date }}</div>
+                        {% if app.is_verified_complete %}
+                            <span class="gc-tag" style="background:#d1fae5;color:#065f46;">Verified Complete</span>
+                        {% elif app.venue_verified_complete %}
+                            <span class="gc-tag" style="background:#fef9c3;color:#854d0e;">Awaiting Performer</span>
+                        {% else %}
+                            <form method="post" action="{% url 'gigs:verify_completion' app.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'venues:manage' venue.pk %}">
+                                <button type="submit" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                                    Mark as Complete
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
     </div>
 </div>
 {% endblock %}

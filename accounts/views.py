@@ -3,18 +3,35 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from .forms import EditProfileForm
+from reviews.utils import generate_gig_notifications
 
 @login_required
 def profile(request):
+    generate_gig_notifications(request.user)
     context = {}
+    today = timezone.now().date()
+
     if request.user.is_performer():
         from gigs.models import GigApplication
-        today = timezone.now().date()
         accepted = GigApplication.objects.filter(
             performer=request.user, status='accepted'
-        ).select_related('listing').order_by('listing__event_date')
+        ).select_related('listing', 'listing__venue').order_by('listing__event_date')
         context['upcoming_gigs'] = [a for a in accepted if a.listing.event_date >= today]
         context['past_gigs'] = [a for a in accepted if a.listing.event_date < today]
+
+    elif request.user.is_venue_owner() or request.user.is_manager():
+        from gigs.models import GigApplication
+        from venues.models import Venue, VenueManager
+        if request.user.is_venue_owner():
+            venue_ids = list(Venue.objects.filter(owner=request.user).values_list('id', flat=True))
+        else:
+            venue_ids = list(VenueManager.objects.filter(user=request.user).values_list('venue_id', flat=True))
+        context['past_venue_gigs'] = GigApplication.objects.filter(
+            listing__venue_id__in=venue_ids,
+            status='accepted',
+            listing__event_date__lt=today,
+        ).select_related('listing', 'listing__venue', 'performer').order_by('-listing__event_date')
+
     return render(request, 'accounts/profile.html', context)
 
 @login_required

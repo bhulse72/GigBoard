@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 32px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">
+        <i class="bi bi-bell-fill"></i> Notifications
+    </h1>
+
+    {% if notifications %}
+        {% for notif in notifications %}
+        <div class="gc-card gc-card-body mb-3" style="{% if not notif.is_read %}border-left: 3px solid var(--accent);{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+                <div style="flex: 1;">
+                    <!-- Icon + type label -->
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+                        {% if notif.notification_type == 'verify_gig' %}
+                            <i class="bi bi-patch-check"></i> Verify Completion
+                        {% else %}
+                            <i class="bi bi-star-fill" style="color: #f59e0b;"></i> Leave a Review
+                        {% endif %}
+                    </div>
+
+                    <p style="font-size: 14px; color: var(--text-secondary); margin: 0 0 10px;">
+                        {{ notif.message }}
+                    </p>
+
+                    <!-- Contextual action link -->
+                    {% if notif.related_application %}
+                        {% if notif.notification_type == 'verify_gig' %}
+                            {% if user.is_performer %}
+                                <a href="{% url 'accounts:profile' %}" class="btn-gc" style="font-size: 12px;">
+                                    Go to My Profile
+                                </a>
+                            {% else %}
+                                <a href="{% url 'venues:manage' notif.related_application.listing.venue.pk %}" class="btn-gc" style="font-size: 12px;">
+                                    Go to Venue Page
+                                </a>
+                            {% endif %}
+                        {% elif notif.notification_type == 'leave_review' %}
+                            {% if user.is_performer %}
+                                <a href="{% url 'venues:detail' notif.related_application.listing.venue.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                                    Review Venue
+                                </a>
+                            {% else %}
+                                <a href="{% url 'performers:profile' notif.related_application.performer.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                                    Review Performer
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0;">
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        {{ notif.created_at|date:"M j, Y" }}
+                    </div>
+                    <form method="post" action="{% url 'reviews:dismiss_notification' notif.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="font-size: 12px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 0;">
+                            Dismiss
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 48px; color: var(--text-muted);">
+            <i class="bi bi-bell-slash" style="font-size: 32px; display: block; margin-bottom: 12px;"></i>
+            You're all caught up.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

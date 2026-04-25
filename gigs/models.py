@@ -61,9 +61,15 @@ class GigApplication(models.Model):
     message = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    venue_verified_complete = models.BooleanField(default=False)
+    performer_verified_complete = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('listing', 'performer')
+
+    @property
+    def is_verified_complete(self):
+        return self.venue_verified_complete and self.performer_verified_complete
 
     def __str__(self):
         return f"{self.performer} → {self.listing}"

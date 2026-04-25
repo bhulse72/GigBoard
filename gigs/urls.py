@@ -13,4 +13,5 @@ urlpatterns = [
     path('<int:pk>/apply/', views.apply_to_gig, name='apply'),
     path('<int:pk>/applications/', views.listing_applications, name='listing_applications'),
     path('applications/<int:pk>/update/', views.update_application, name='update_application'),
+    path('applications/<int:pk>/verify/', views.verify_gig_completion, name='verify_completion'),
 ]
