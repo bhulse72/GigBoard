@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — GigBoard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="gc-card" style="width: 100%; max-width: 420px;">
+        <div class="profile-banner"></div>
+        <div class="gc-card-body p-4">
+            <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                Create Account
+            </h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">
+                Join GigBoard today
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.field.widget.input_type == 'select' %}
+                            <select name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+                                style="background-color: #0f0f1f; border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px; padding: 8px 12px; width: 100%; font-size: 14px;">
+                                {% for value, label in field.field.choices %}
+                                    <option value="{{ value }}"
+                                        {% if field.value == value %}selected{% endif %}
+                                        style="background-color: #0f0f1f; color: var(--text-primary);">
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        {% if field.errors %}
+                            <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-gc btn-gc-filled w-100 mt-2">
+                    Create Account
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 16px;">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                    Already have an account?
+                </p>
+                <a href="{% url 'accounts:login' %}" class="btn-gc btn-gc-outline w-100">
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
