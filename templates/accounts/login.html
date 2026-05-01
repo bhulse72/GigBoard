@@ -31,6 +31,15 @@
                     Sign In
                 </button>
             </form>
+
+            <div style="text-align: center; margin-top: 16px;">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                    Don't have an account?
+                </p>
+                <a href="{% url 'accounts:register' %}" class="btn-gc btn-gc-outline w-100">
+                    Create Account
+                </a>
+            </div>
         </div>
     </div>
 </div>

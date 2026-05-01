@@ -41,7 +41,24 @@
                 {% for field in form %}
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
+                        {% if field.field.widget.input_type == 'select' %}
+                            <select name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+                                style="background-color: #0f0f1f; border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px; padding: 8px 12px; width: 100%; font-size: 14px;">
+                                {% for value, label in field.field.choices %}
+                                    <option value="{{ value }}"
+                                        {% if field.value == value %}selected{% endif %}
+                                        style="background-color: #0f0f1f; color: var(--text-primary);">
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% elif field.field.widget.input_type == 'url' %}
+                            <input type="url" name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+                                value="{{ field.value|default:'' }}"
+                                style="background-color: #0f0f1f; border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px; padding: 8px 12px; width: 100%;">
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
                         {% if field.errors %}
                             <div style="color: #f87171; font-size: 12px; margin-top: 4px;">
                                 {{ field.errors }}
