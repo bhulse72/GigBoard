@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Upcoming Performances — GigBoard{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div></div>
+    <div>
+        <div class="gc-card gc-card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="gc-card-title mb-0">Upcoming Performances</div>
+                <a href="{% url 'fans:my_following' %}" class="btn-gc">My Following</a>
+            </div>
+
+            {% if upcoming_gigs %}
+                {% for app in upcoming_gigs %}
+                    <div class="gc-card mb-3">
+                        <div class="gc-card-body">
+                            <h5>
+                                {% if app.performer.stage_name %}
+                                    {{ app.performer.stage_name }}
+                                {% else %}
+                                    {{ app.performer.username }}
+                                {% endif %}
+                            </h5>
+
+                            <div class="profile-location">
+                                {{ app.listing.venue_name }}
+                                {% if app.listing.location %} • {{ app.listing.location }}{% endif %}
+                            </div>
+
+                            <div class="mt-2">
+                                <span class="gc-tag">{{ app.listing.get_preferred_style_display }}</span>
+                            </div>
+
+                            {% if app.listing.description %}
+                                <p class="mt-2" style="color: var(--text-secondary);">
+                                    {{ app.listing.description }}
+                                </p>
+                            {% endif %}
+
+                            <small style="color: var(--text-muted);">
+                                {{ app.listing.event_date }} at {{ app.listing.start_time }}
+                            </small>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">
+                    No upcoming performances from performers you follow yet.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,4 +10,5 @@ urlpatterns = [
     path('', include('core.urls')),
     path('lessons/', include('lessons.urls', namespace='lessons')),
     path('reviews/', include('reviews.urls', namespace='reviews')),
+    path('fans/', include('fans.urls')),
 ]

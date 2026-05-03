@@ -19,6 +19,18 @@
         <ul class="navbar-nav flex-row align-items-center gap-1">
         {% if user.is_authenticated %}
 
+            {% if user.is_fan %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fans:performer_list' %}">Performers</a>
+                </li>    
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fans:my_following' %}">Following</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fans:followed_schedule' %}">Schedule</a>
+                </li>
+            {% endif %}
+
             {% if user.is_performer %}
                 <!-- Network -->
                 <li class="nav-item">
