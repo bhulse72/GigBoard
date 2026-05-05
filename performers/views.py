@@ -18,9 +18,11 @@ def performer_directory(request):
         messages.error(request, 'Only performers can access the networking directory.')
         return redirect('accounts:profile')
 
-    from django.db.models import Case, When, IntegerField
+    from django.db.models import Avg, Case, When, IntegerField
 
-    performers = User.objects.filter(role='performer').exclude(id=request.user.id)
+    performers = User.objects.filter(role='performer').exclude(id=request.user.id).annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
 
     if request.user.music_style:
         performers = performers.annotate(
@@ -84,7 +86,11 @@ def performer_browser(request):
         messages.error(request, 'Only venue owners and managers can browse performers.')
         return redirect('accounts:profile')
 
-    performers = User.objects.filter(role='performer')
+    from django.db.models import Avg
+
+    performers = User.objects.filter(role='performer').annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
 
     location = request.GET.get('location', '').strip()
     style = request.GET.get('style', '').strip()
@@ -164,10 +170,10 @@ def performer_profile(request, user_id):
                     candidate_venues = Venue.objects.filter(venuemanager__user=request.user)
 
                 active_venue = candidate_venues.filter(
-                    giglisting__applications__performer=performer,
-                    giglisting__applications__status='accepted',
-                    giglisting__applications__venue_verified_complete=True,
-                    giglisting__applications__performer_verified_complete=True,
+                    gig_listings__applications__performer=performer,
+                    gig_listings__applications__status='accepted',
+                    gig_listings__applications__venue_verified_complete=True,
+                    gig_listings__applications__performer_verified_complete=True,
                 ).first()
 
             if active_venue:
@@ -249,28 +255,29 @@ def my_connections(request):
         messages.error(request, 'Only performers can access connections.')
         return redirect('accounts:profile')
 
-    from django.db.models import Q
+    from django.db.models import Avg, Q
 
     accepted = CollaborationRequest.objects.filter(
         Q(sender=request.user) | Q(receiver=request.user),
         status=CollaborationRequest.Status.ACCEPTED,
-    ).select_related('sender', 'receiver')
+    )
+    sender_ids = accepted.filter(receiver=request.user).values_list('sender_id', flat=True)
+    receiver_ids = accepted.filter(sender=request.user).values_list('receiver_id', flat=True)
+    connected_ids = list(sender_ids) + list(receiver_ids)
 
-    connections = [
-        req.receiver if req.sender == request.user else req.sender
-        for req in accepted
-    ]
+    connections = User.objects.filter(id__in=connected_ids).annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
 
     query = request.GET.get('q', '').strip()
     if query:
-        q = query.lower()
-        connections = [
-            p for p in connections
-            if q in (p.stage_name or '').lower()
-            or q in p.get_full_name().lower()
-            or q in p.username.lower()
-            or q in (p.music_style or '').lower()
-        ]
+        connections = connections.filter(
+            models.Q(stage_name__icontains=query) |
+            models.Q(first_name__icontains=query) |
+            models.Q(last_name__icontains=query) |
+            models.Q(username__icontains=query) |
+            models.Q(music_style__icontains=query)
+        )
 
     return render(request, 'performers/connections.html', {
         'connections': connections,

@@ -70,6 +70,12 @@
                     </div>
                 {% endif %}
 
+                {% if performer.avg_rating %}
+                    <div style="font-size: 13px; color: var(--text-primary);">
+                        <span style="color: #f59e0b;">&#9733;</span> {{ performer.avg_rating|floatformat:1 }}
+                    </div>
+                {% endif %}
+
                 {% if performer.bio %}
                     <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
                         {{ performer.bio|truncatechars:100 }}

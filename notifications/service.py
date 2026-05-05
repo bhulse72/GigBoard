@@ -61,6 +61,45 @@ def notify_application_declined(application):
     )
 
 
+def notify_collab_request_received(collab_request):
+    """Notify a performer that someone sent them a collaboration request."""
+    sender_name = collab_request.sender.stage_name or collab_request.sender.username
+    Notification.objects.get_or_create(
+        recipient=collab_request.receiver,
+        notification_type=Notification.COLLAB_REQUEST_RECEIVED,
+        related_collab_request=collab_request,
+        defaults={
+            'message': f'{sender_name} sent you a collaboration request.',
+        },
+    )
+
+
+def notify_collab_request_accepted(collab_request):
+    """Notify a performer that their collaboration request was accepted."""
+    receiver_name = collab_request.receiver.stage_name or collab_request.receiver.username
+    Notification.objects.get_or_create(
+        recipient=collab_request.sender,
+        notification_type=Notification.COLLAB_REQUEST_ACCEPTED,
+        related_collab_request=collab_request,
+        defaults={
+            'message': f'{receiver_name} accepted your collaboration request.',
+        },
+    )
+
+
+def notify_collab_request_declined(collab_request):
+    """Notify a performer that their collaboration request was declined."""
+    receiver_name = collab_request.receiver.stage_name or collab_request.receiver.username
+    Notification.objects.get_or_create(
+        recipient=collab_request.sender,
+        notification_type=Notification.COLLAB_REQUEST_DECLINED,
+        related_collab_request=collab_request,
+        defaults={
+            'message': f'{receiver_name} declined your collaboration request.',
+        },
+    )
+
+
 def _notify_verify_gig(recipient, app, message):
     Notification.objects.get_or_create(
         recipient=recipient,
