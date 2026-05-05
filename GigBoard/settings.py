@@ -31,8 +31,7 @@ if not SECRET_KEY:
     raise ImproperlyConfigured('The SECRET_KEY environment variable is not set')
 
 #SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Development mode - set to False for production
-#DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
