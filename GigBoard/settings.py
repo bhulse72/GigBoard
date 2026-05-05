@@ -14,6 +14,7 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 load_dotenv()
 
@@ -25,12 +26,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k7wcfoq4!^+ly)-&=i==+9(y0arh7#2^=ta(47-1!)zhihf94u'
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('The SECRET_KEY environment variable is not set')
 
 #SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*'] if DEBUG else os.getenv('ALLOWED_HOSTS', '').split(',')
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    raw_allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+    ALLOWED_HOSTS = [host.strip() for host in raw_allowed_hosts.split(',') if host.strip()]
+    if not ALLOWED_HOSTS:
+        raise ImproperlyConfigured('ALLOWED_HOSTS must be set in production')
 
 
 # Application definition
