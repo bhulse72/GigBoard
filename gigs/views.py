@@ -92,6 +92,19 @@ def my_listings(request):
     })
 
 @login_required
+def my_bookings(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can view this page.')
+        return redirect('gigs:listing_list')
+
+    applications = GigApplication.objects.filter(
+        performer=request.user,
+        status='accepted',
+    ).select_related('listing').order_by('listing__event_date')
+
+    return render(request, 'gigs/my_bookings.html', {'applications': applications})
+
+@login_required
 def close_listing(request, pk):
     listing = get_object_or_404(GigListing, pk=pk)
     if request.user != listing.created_by and not request.user.is_venue_owner():

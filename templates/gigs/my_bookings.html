@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; padding: 0 16px;">
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">My Bookings</h1>
+
+    {% if applications %}
+        {% for app in applications %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ app.listing.title }}</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                            {{ app.listing.venue_name }} · {{ app.listing.event_date }} at {{ app.listing.start_time }}
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <span class="gc-tag">{{ app.listing.get_preferred_style_display }}</span>
+                            <span class="gc-tag">${{ app.listing.pay }}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
+                        {% if app.is_verified_complete %}
+                            <span class="gc-tag" style="background:#d1fae5;color:#065f46;">Verified Complete</span>
+                        {% elif app.performer_verified_complete %}
+                            <span class="gc-tag" style="background:#fef9c3;color:#854d0e;">Awaiting Venue</span>
+                        {% else %}
+                            <form method="post" action="{% url 'gigs:verify_completion' app.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'gigs:my_bookings' %}">
+                                <button type="submit" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                                    Mark as Complete
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 40px;">
+            <p style="color: var(--text-muted);">No accepted gigs yet.</p>
+            <a href="{% url 'gigs:listing_list' %}" class="btn-gc btn-gc-filled">Browse Gigs</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

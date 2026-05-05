@@ -14,7 +14,7 @@
                 <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">{{ venue.city }}, {{ venue.state }}</div>
                 {% if venue.genre_tags %}
                     <div style="margin-top: 8px;">
-                        {% for tag in venue.genre_tags.split %}
+                        {% for tag in genre_tags %}
                             <span class="gc-tag">{{ tag }}</span>
                         {% endfor %}
                     </div>

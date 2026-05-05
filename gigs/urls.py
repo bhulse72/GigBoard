@@ -16,4 +16,5 @@ urlpatterns = [
     path('applications/<int:pk>/verify/', views.verify_gig_completion, name='verify_completion'),
     path('invite/<int:performer_id>/', views.invite_performer, name='invite_performer'),
     path('listings/<int:pk>/edit/', views.edit_listing, name='edit_listing'),
+    path('bookings/', views.my_bookings, name='my_bookings'),
 ]
