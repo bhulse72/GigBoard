@@ -18,15 +18,24 @@ def performer_directory(request):
         messages.error(request, 'Only performers can access the networking directory.')
         return redirect('accounts:profile')
 
+    from django.db.models import Case, When, IntegerField
+
     performers = User.objects.filter(role='performer').exclude(id=request.user.id)
 
     if request.user.music_style:
-        similar_performers = performers.filter(music_style=request.user.music_style)
+        performers = performers.annotate(
+            is_similar=Case(
+                When(music_style=request.user.music_style, then=0),
+                default=1,
+                output_field=IntegerField(),
+            )
+        ).order_by('is_similar', 'username')
     else:
-        similar_performers = performers
+        performers = performers.order_by('username')
 
     return render(request, 'performers/directory.html', {
-        'performers': similar_performers,
+        'performers': performers,
+        'user_style': request.user.music_style,
     })
 
 
