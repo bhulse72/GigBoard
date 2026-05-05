@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Network Feed — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+        <i class="bi bi-broadcast"></i> Network Feed
+    </h1>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">
+        Upcoming and past gigs from your connections.
+    </p>
+
+    {% if not has_connections %}
+        <div class="gc-card gc-card-body" style="text-align: center; padding: 48px; color: var(--text-muted);">
+            <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 12px;"></i>
+            You have no connections yet. Browse performers and send collaboration requests to build your network.
+            <div style="margin-top: 16px;">
+                <a href="{% url 'performers:directory' %}" class="btn-gc btn-gc-filled">Browse Performers</a>
+            </div>
+        </div>
+
+    {% else %}
+
+        <!-- Upcoming -->
+        <h2 style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+            <i class="bi bi-calendar-event"></i> Upcoming
+        </h2>
+
+        {% if upcoming %}
+            {% for app in upcoming %}
+            <div class="gc-card gc-card-body mb-3">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
+                                display: flex; align-items: center; justify-content: center;
+                                font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;">
+                        {{ app.performer.username|slice:":2"|upper }}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">
+                            {{ app.performer.stage_name|default:app.performer.get_full_name|default:app.performer.username }}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">
+                            {{ app.listing.title }} &mdash; {{ app.listing.venue_name }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                            <i class="bi bi-calendar3"></i> {{ app.listing.event_date }}
+                            &nbsp;<i class="bi bi-clock"></i> {{ app.listing.start_time }}
+                        </div>
+                    </div>
+                    <a href="{% url 'performers:profile' app.performer.pk %}" class="btn-gc" style="font-size: 12px; flex-shrink: 0;">
+                        Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="gc-card gc-card-body mb-4" style="color: var(--text-muted); font-size: 14px; padding: 24px;">
+                None of your connections have upcoming gigs.
+            </div>
+        {% endif %}
+
+        <!-- Past -->
+        <h2 style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 24px 0 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+            <i class="bi bi-clock-history"></i> Past
+        </h2>
+
+        {% if past %}
+            {% for app in past %}
+            <div class="gc-card gc-card-body mb-3" style="opacity: 0.75;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--surface-2);
+                                display: flex; align-items: center; justify-content: center;
+                                font-size: 13px; font-weight: 700; color: var(--text-muted); flex-shrink: 0;">
+                        {{ app.performer.username|slice:":2"|upper }}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">
+                            {{ app.performer.stage_name|default:app.performer.get_full_name|default:app.performer.username }}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">
+                            {{ app.listing.title }} &mdash; {{ app.listing.venue_name }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                            <i class="bi bi-calendar3"></i> {{ app.listing.event_date }}
+                        </div>
+                    </div>
+                    <a href="{% url 'performers:profile' app.performer.pk %}" class="btn-gc" style="font-size: 12px; flex-shrink: 0;">
+                        Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="gc-card gc-card-body" style="color: var(--text-muted); font-size: 14px; padding: 24px;">
+                No past gigs from your connections.
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -193,6 +193,82 @@ def performer_profile(request, user_id):
 
 
 @login_required
+def connections_feed(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can access the network feed.')
+        return redirect('accounts:profile')
+
+    from django.db.models import Q
+
+    connected_ids = list(
+        CollaborationRequest.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user),
+            status=CollaborationRequest.Status.ACCEPTED,
+        ).values_list('receiver_id', flat=True).filter(sender=request.user)
+    ) + list(
+        CollaborationRequest.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user),
+            status=CollaborationRequest.Status.ACCEPTED,
+        ).values_list('sender_id', flat=True).filter(receiver=request.user)
+    )
+
+    today = timezone.now().date()
+
+    gig_apps = GigApplication.objects.filter(
+        performer_id__in=connected_ids,
+        status='accepted',
+    ).select_related('listing', 'performer').order_by('listing__event_date')
+
+    upcoming = [a for a in gig_apps if a.listing.event_date >= today]
+    past = sorted(
+        [a for a in gig_apps if a.listing.event_date < today],
+        key=lambda a: a.listing.event_date,
+        reverse=True,
+    )
+
+    return render(request, 'performers/feed.html', {
+        'upcoming': upcoming,
+        'past': past,
+        'has_connections': bool(connected_ids),
+    })
+
+
+@login_required
+def my_connections(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can access connections.')
+        return redirect('accounts:profile')
+
+    from django.db.models import Q
+
+    accepted = CollaborationRequest.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user),
+        status=CollaborationRequest.Status.ACCEPTED,
+    ).select_related('sender', 'receiver')
+
+    connections = [
+        req.receiver if req.sender == request.user else req.sender
+        for req in accepted
+    ]
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        q = query.lower()
+        connections = [
+            p for p in connections
+            if q in (p.stage_name or '').lower()
+            or q in p.get_full_name().lower()
+            or q in p.username.lower()
+            or q in (p.music_style or '').lower()
+        ]
+
+    return render(request, 'performers/connections.html', {
+        'connections': connections,
+        'query': query,
+    })
+
+
+@login_required
 def my_requests(request):
     if not request.user.is_performer():
         messages.error(request, 'Only performers can access collaboration requests.')

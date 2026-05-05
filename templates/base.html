@@ -32,12 +32,18 @@
             {% endif %}
 
             {% if user.is_performer %}
-                <!-- Network -->
-                <li class="nav-item">
-                    <a class="nav-link nav-icon-link" href="{% url 'performers:directory' %}" title="Network">
+                <!-- Network dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="bi bi-people-fill"></i>
                         <span>Network</span>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-dark-gc">
+                        <li><a class="dropdown-item-gc" href="{% url 'performers:feed' %}"><i class="bi bi-broadcast"></i> Feed</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'performers:connections' %}"><i class="bi bi-person-check-fill"></i> My Connections</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'performers:directory' %}"><i class="bi bi-search"></i> Browse Performers</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'performers:requests' %}"><i class="bi bi-person-plus-fill"></i> Collaboration Requests</a></li>
+                    </ul>
                 </li>
 
                 <!-- Lessons dropdown -->
