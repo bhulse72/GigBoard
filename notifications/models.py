@@ -6,10 +6,14 @@ class Notification(models.Model):
     VERIFY_GIG = 'verify_gig'
     LEAVE_REVIEW = 'leave_review'
     GIG_INVITE = 'gig_invite'
+    APPLICATION_ACCEPTED = 'application_accepted'
+    APPLICATION_DECLINED = 'application_declined'
     TYPE_CHOICES = [
         (VERIFY_GIG, 'Verify Gig Completion'),
         (LEAVE_REVIEW, 'Leave a Review'),
         (GIG_INVITE, 'Gig Invitation'),
+        (APPLICATION_ACCEPTED, 'Application Accepted'),
+        (APPLICATION_DECLINED, 'Application Declined'),
     ]
 
     recipient = models.ForeignKey(

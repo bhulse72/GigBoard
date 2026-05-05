@@ -73,6 +73,19 @@ def submit_performer_review(request, user_id):
     elif request.user.is_venue_owner() or request.user.is_manager():
         active_venue = _get_active_venue(request)
         if not active_venue:
+            # Fall back to venue_id posted from the profile page review form
+            fallback_id = request.POST.get('venue_id')
+            if fallback_id:
+                candidate = Venue.objects.filter(pk=fallback_id).first()
+                if candidate:
+                    authorized = (
+                        (request.user.is_venue_owner() and candidate.owner == request.user) or
+                        (request.user.is_manager() and VenueManager.objects.filter(
+                            user=request.user, venue=candidate).exists())
+                    )
+                    if authorized:
+                        active_venue = candidate
+        if not active_venue:
             messages.error(request, 'No active venue selected. Visit your venue management page first.')
             return redirect('performers:profile', user_id=user_id)
         qualifying_app = _verified_app_for_performer_review(request.user, active_venue, performer)

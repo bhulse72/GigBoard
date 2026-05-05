@@ -113,7 +113,7 @@ def performer_browser(request):
 @login_required
 def performer_profile(request, user_id):
     from django.db.models import Avg
-    from venues.models import Venue, VenueManager
+    from venues.models import Venue
 
     performer = get_object_or_404(User, id=user_id, role='performer')
     today = timezone.now().date()
@@ -153,28 +153,37 @@ def performer_profile(request, user_id):
             ).first()
 
         elif request.user.is_venue_owner() or request.user.is_manager():
+            # Try session first, then auto-detect a qualifying venue for this performer
             active_venue_id = request.session.get('active_venue_id')
             active_venue = Venue.objects.filter(pk=active_venue_id).first() if active_venue_id else None
+
+            if not active_venue:
+                if request.user.is_venue_owner():
+                    candidate_venues = Venue.objects.filter(owner=request.user)
+                else:
+                    candidate_venues = Venue.objects.filter(venuemanager__user=request.user)
+
+                active_venue = candidate_venues.filter(
+                    giglisting__applications__performer=performer,
+                    giglisting__applications__status='accepted',
+                    giglisting__applications__venue_verified_complete=True,
+                    giglisting__applications__performer_verified_complete=True,
+                ).first()
+
             if active_venue:
-                authorized = (
-                    (request.user.is_venue_owner() and active_venue.owner == request.user) or
-                    (request.user.is_manager() and VenueManager.objects.filter(
-                        user=request.user, venue=active_venue).exists())
-                )
-                if authorized:
-                    has_completed_gig = GigApplication.objects.filter(
-                        listing__venue=active_venue,
-                        performer=performer,
-                        status='accepted',
-                        venue_verified_complete=True,
-                        performer_verified_complete=True,
-                    ).exists()
-                    if has_completed_gig:
-                        can_review = True
-                        existing_review = Review.objects.filter(
-                            reviewing_venue=active_venue,
-                            reviewed_performer=performer,
-                        ).first()
+                has_completed_gig = GigApplication.objects.filter(
+                    listing__venue=active_venue,
+                    performer=performer,
+                    status='accepted',
+                    venue_verified_complete=True,
+                    performer_verified_complete=True,
+                ).exists()
+                if has_completed_gig:
+                    can_review = True
+                    existing_review = Review.objects.filter(
+                        reviewing_venue=active_venue,
+                        reviewed_performer=performer,
+                    ).first()
 
         if can_review:
             review_form = ReviewForm(instance=existing_review)
@@ -189,6 +198,7 @@ def performer_profile(request, user_id):
         'can_review': can_review,
         'existing_review': existing_review,
         'review_form': review_form,
+        'review_venue': active_venue if can_review else None,
     })
 
 

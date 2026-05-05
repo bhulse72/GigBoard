@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from reviews.utils import generate_gig_notifications
+from .service import generate_gig_notifications
 from .models import Notification
 
 

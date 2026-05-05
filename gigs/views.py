@@ -182,32 +182,16 @@ def invite_performer(request, performer_id):
         return redirect('performers:browse')
 
     if request.method == 'POST':
-        from notifications.models import Notification
+        from notifications.service import notify_gig_invite
 
         listing_id = request.POST.get('listing_id')
         listing = get_object_or_404(GigListing, pk=listing_id, created_by=request.user, is_open=True)
 
-        already_invited = Notification.objects.filter(
-            recipient=performer,
-            notification_type=Notification.GIG_INVITE,
-            related_listing=listing,
-        ).exists()
-
-        if already_invited:
+        sent = notify_gig_invite(performer, listing)
+        if sent:
+            messages.success(request, f'Invitation sent to {performer.stage_name or performer.username}.')
+        else:
             messages.info(request, f'{performer.stage_name or performer.username} has already been invited to that gig.')
-            return redirect('performers:browse')
-
-        venue_display = listing.venue_name or request.user.username
-        Notification.objects.create(
-            recipient=performer,
-            notification_type=Notification.GIG_INVITE,
-            related_listing=listing,
-            message=(
-                f'{venue_display} has invited you to apply for "{listing.title}" '
-                f'on {listing.event_date.strftime("%B %-d, %Y")}.'
-            ),
-        )
-        messages.success(request, f'Invitation sent to {performer.stage_name or performer.username}.')
         return redirect('performers:browse')
 
     return render(request, 'gigs/invite_performer.html', {
