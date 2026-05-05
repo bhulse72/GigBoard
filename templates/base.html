@@ -113,7 +113,7 @@
 
             <!-- Notifications bell (all roles) -->
             <li class="nav-item">
-                <a class="nav-link nav-icon-link" href="{% url 'reviews:notifications' %}" title="Notifications" style="position: relative;">
+                <a class="nav-link nav-icon-link" href="{% url 'notifications:inbox' %}" title="Notifications" style="position: relative;">
                     <i class="bi bi-bell-fill"></i>
                     <span>Inbox</span>
                     {% if unread_notification_count %}

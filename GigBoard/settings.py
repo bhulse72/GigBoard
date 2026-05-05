@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'fans',
     'lessons.apps.LessonsConfig',
     'reviews.apps.ReviewsConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -91,7 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'reviews.context_processors.unread_notifications',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },

@@ -182,7 +182,7 @@ def invite_performer(request, performer_id):
         return redirect('performers:browse')
 
     if request.method == 'POST':
-        from reviews.models import Notification
+        from notifications.models import Notification
 
         listing_id = request.POST.get('listing_id')
         listing = get_object_or_404(GigListing, pk=listing_id, created_by=request.user, is_open=True)

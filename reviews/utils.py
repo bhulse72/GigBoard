@@ -8,7 +8,7 @@ def generate_gig_notifications(user):
     """
     from gigs.models import GigApplication
     from venues.models import Venue, VenueManager
-    from .models import Notification
+    from notifications.models import Notification
 
     today = timezone.now().date()
 
