@@ -18,15 +18,26 @@ def performer_directory(request):
         messages.error(request, 'Only performers can access the networking directory.')
         return redirect('accounts:profile')
 
-    performers = User.objects.filter(role='performer').exclude(id=request.user.id)
+    from django.db.models import Avg, Case, When, IntegerField
+
+    performers = User.objects.filter(role='performer').exclude(id=request.user.id).annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
 
     if request.user.music_style:
-        similar_performers = performers.filter(music_style=request.user.music_style)
+        performers = performers.annotate(
+            is_similar=Case(
+                When(music_style=request.user.music_style, then=0),
+                default=1,
+                output_field=IntegerField(),
+            )
+        ).order_by('is_similar', 'username')
     else:
-        similar_performers = performers
+        performers = performers.order_by('username')
 
     return render(request, 'performers/directory.html', {
-        'performers': similar_performers,
+        'performers': performers,
+        'user_style': request.user.music_style,
     })
 
 
@@ -75,7 +86,11 @@ def performer_browser(request):
         messages.error(request, 'Only venue owners and managers can browse performers.')
         return redirect('accounts:profile')
 
-    performers = User.objects.filter(role='performer')
+    from django.db.models import Avg
+
+    performers = User.objects.filter(role='performer').annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
 
     location = request.GET.get('location', '').strip()
     style = request.GET.get('style', '').strip()
@@ -104,7 +119,7 @@ def performer_browser(request):
 @login_required
 def performer_profile(request, user_id):
     from django.db.models import Avg
-    from venues.models import Venue, VenueManager
+    from venues.models import Venue
 
     performer = get_object_or_404(User, id=user_id, role='performer')
     today = timezone.now().date()
@@ -144,28 +159,37 @@ def performer_profile(request, user_id):
             ).first()
 
         elif request.user.is_venue_owner() or request.user.is_manager():
+            # Try session first, then auto-detect a qualifying venue for this performer
             active_venue_id = request.session.get('active_venue_id')
             active_venue = Venue.objects.filter(pk=active_venue_id).first() if active_venue_id else None
+
+            if not active_venue:
+                if request.user.is_venue_owner():
+                    candidate_venues = Venue.objects.filter(owner=request.user)
+                else:
+                    candidate_venues = Venue.objects.filter(venuemanager__user=request.user)
+
+                active_venue = candidate_venues.filter(
+                    gig_listings__applications__performer=performer,
+                    gig_listings__applications__status='accepted',
+                    gig_listings__applications__venue_verified_complete=True,
+                    gig_listings__applications__performer_verified_complete=True,
+                ).first()
+
             if active_venue:
-                authorized = (
-                    (request.user.is_venue_owner() and active_venue.owner == request.user) or
-                    (request.user.is_manager() and VenueManager.objects.filter(
-                        user=request.user, venue=active_venue).exists())
-                )
-                if authorized:
-                    has_completed_gig = GigApplication.objects.filter(
-                        listing__venue=active_venue,
-                        performer=performer,
-                        status='accepted',
-                        venue_verified_complete=True,
-                        performer_verified_complete=True,
-                    ).exists()
-                    if has_completed_gig:
-                        can_review = True
-                        existing_review = Review.objects.filter(
-                            reviewing_venue=active_venue,
-                            reviewed_performer=performer,
-                        ).first()
+                has_completed_gig = GigApplication.objects.filter(
+                    listing__venue=active_venue,
+                    performer=performer,
+                    status='accepted',
+                    venue_verified_complete=True,
+                    performer_verified_complete=True,
+                ).exists()
+                if has_completed_gig:
+                    can_review = True
+                    existing_review = Review.objects.filter(
+                        reviewing_venue=active_venue,
+                        reviewed_performer=performer,
+                    ).first()
 
         if can_review:
             review_form = ReviewForm(instance=existing_review)
@@ -180,6 +204,84 @@ def performer_profile(request, user_id):
         'can_review': can_review,
         'existing_review': existing_review,
         'review_form': review_form,
+        'review_venue': active_venue if can_review else None,
+    })
+
+
+@login_required
+def connections_feed(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can access the network feed.')
+        return redirect('accounts:profile')
+
+    from django.db.models import Q
+
+    connected_ids = list(
+        CollaborationRequest.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user),
+            status=CollaborationRequest.Status.ACCEPTED,
+        ).values_list('receiver_id', flat=True).filter(sender=request.user)
+    ) + list(
+        CollaborationRequest.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user),
+            status=CollaborationRequest.Status.ACCEPTED,
+        ).values_list('sender_id', flat=True).filter(receiver=request.user)
+    )
+
+    today = timezone.now().date()
+
+    gig_apps = GigApplication.objects.filter(
+        performer_id__in=connected_ids,
+        status='accepted',
+    ).select_related('listing', 'performer').order_by('listing__event_date')
+
+    upcoming = [a for a in gig_apps if a.listing.event_date >= today]
+    past = sorted(
+        [a for a in gig_apps if a.listing.event_date < today],
+        key=lambda a: a.listing.event_date,
+        reverse=True,
+    )
+
+    return render(request, 'performers/feed.html', {
+        'upcoming': upcoming,
+        'past': past,
+        'has_connections': bool(connected_ids),
+    })
+
+
+@login_required
+def my_connections(request):
+    if not request.user.is_performer():
+        messages.error(request, 'Only performers can access connections.')
+        return redirect('accounts:profile')
+
+    from django.db.models import Avg, Q
+
+    accepted = CollaborationRequest.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user),
+        status=CollaborationRequest.Status.ACCEPTED,
+    )
+    sender_ids = accepted.filter(receiver=request.user).values_list('sender_id', flat=True)
+    receiver_ids = accepted.filter(sender=request.user).values_list('receiver_id', flat=True)
+    connected_ids = list(sender_ids) + list(receiver_ids)
+
+    connections = User.objects.filter(id__in=connected_ids).annotate(
+        avg_rating=Avg('reviews_received__rating')
+    )
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        connections = connections.filter(
+            models.Q(stage_name__icontains=query) |
+            models.Q(first_name__icontains=query) |
+            models.Q(last_name__icontains=query) |
+            models.Q(username__icontains=query) |
+            models.Q(music_style__icontains=query)
+        )
+
+    return render(request, 'performers/connections.html', {
+        'connections': connections,
+        'query': query,
     })
 
 

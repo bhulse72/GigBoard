@@ -18,8 +18,20 @@
                     <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
                         {% if notif.notification_type == 'verify_gig' %}
                             <i class="bi bi-patch-check"></i> Verify Completion
-                        {% else %}
+                        {% elif notif.notification_type == 'leave_review' %}
                             <i class="bi bi-star-fill" style="color: #f59e0b;"></i> Leave a Review
+                        {% elif notif.notification_type == 'gig_invite' %}
+                            <i class="bi bi-envelope-open-fill" style="color: var(--accent);"></i> Gig Invitation
+                        {% elif notif.notification_type == 'application_accepted' %}
+                            <i class="bi bi-check-circle-fill" style="color: #10b981;"></i> Application Accepted
+                        {% elif notif.notification_type == 'application_declined' %}
+                            <i class="bi bi-x-circle-fill" style="color: #ef4444;"></i> Application Declined
+                        {% elif notif.notification_type == 'collab_request_received' %}
+                            <i class="bi bi-person-plus-fill" style="color: var(--accent);"></i> Collaboration Request
+                        {% elif notif.notification_type == 'collab_request_accepted' %}
+                            <i class="bi bi-people-fill" style="color: #10b981;"></i> Request Accepted
+                        {% elif notif.notification_type == 'collab_request_declined' %}
+                            <i class="bi bi-person-dash-fill" style="color: #ef4444;"></i> Request Declined
                         {% endif %}
                     </div>
 
@@ -28,7 +40,31 @@
                     </p>
 
                     <!-- Contextual action link -->
-                    {% if notif.related_application %}
+                    {% if notif.notification_type == 'gig_invite' and notif.related_listing %}
+                        <a href="{% url 'gigs:apply' notif.related_listing.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                            View &amp; Apply
+                        </a>
+                    {% elif notif.notification_type == 'application_accepted' and notif.related_application %}
+                        <a href="{% url 'gigs:listing_list' %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                            View Gigs
+                        </a>
+                    {% elif notif.notification_type == 'application_declined' %}
+                        <a href="{% url 'gigs:listing_list' %}" class="btn-gc" style="font-size: 12px;">
+                            Browse Gigs
+                        </a>
+                    {% elif notif.notification_type == 'collab_request_received' %}
+                        <a href="{% url 'performers:requests' %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                            View Requests
+                        </a>
+                    {% elif notif.notification_type == 'collab_request_accepted' %}
+                        <a href="{% url 'performers:connections' %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                            My Connections
+                        </a>
+                    {% elif notif.notification_type == 'collab_request_declined' %}
+                        <a href="{% url 'performers:directory' %}" class="btn-gc" style="font-size: 12px;">
+                            Browse Performers
+                        </a>
+                    {% elif notif.related_application %}
                         {% if notif.notification_type == 'verify_gig' %}
                             {% if user.is_performer %}
                                 <a href="{% url 'accounts:profile' %}" class="btn-gc" style="font-size: 12px;">
@@ -57,7 +93,7 @@
                     <div style="font-size: 11px; color: var(--text-muted);">
                         {{ notif.created_at|date:"M j, Y" }}
                     </div>
-                    <form method="post" action="{% url 'reviews:dismiss_notification' notif.id %}">
+                    <form method="post" action="{% url 'notifications:dismiss' notif.id %}">
                         {% csrf_token %}
                         <button type="submit" style="font-size: 12px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 0;">
                             Dismiss

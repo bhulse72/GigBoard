@@ -42,10 +42,9 @@ else:
     if not ALLOWED_HOSTS:
         raise ImproperlyConfigured('ALLOWED_HOSTS must be set in production')
     CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -66,6 +65,7 @@ INSTALLED_APPS = [
     'fans',
     'lessons.apps.LessonsConfig',
     'reviews.apps.ReviewsConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -91,7 +91,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'reviews.context_processors.unread_notifications',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },

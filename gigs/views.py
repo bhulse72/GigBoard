@@ -7,6 +7,7 @@ from django.utils import timezone
 from .models import GigListing, GigApplication
 from .forms import GigListingForm
 from venues.models import Venue, VenueManager
+from accounts.models import User
 
 
 @login_required
@@ -163,6 +164,40 @@ def verify_gig_completion(request, pk):
     if next_url:
         return redirect(next_url)
     return redirect('accounts:profile')
+
+
+@login_required
+def invite_performer(request, performer_id):
+    if not (request.user.is_venue_owner() or request.user.is_manager()):
+        messages.error(request, 'Only venue owners and managers can invite performers.')
+        return redirect('accounts:profile')
+
+    performer = get_object_or_404(User, id=performer_id, role='performer')
+
+    # Gather open listings belonging to this user
+    open_listings = GigListing.objects.filter(created_by=request.user, is_open=True).order_by('event_date')
+
+    if not open_listings.exists():
+        messages.error(request, 'You have no open gig listings to invite performers to.')
+        return redirect('performers:browse')
+
+    if request.method == 'POST':
+        from notifications.service import notify_gig_invite
+
+        listing_id = request.POST.get('listing_id')
+        listing = get_object_or_404(GigListing, pk=listing_id, created_by=request.user, is_open=True)
+
+        sent = notify_gig_invite(performer, listing)
+        if sent:
+            messages.success(request, f'Invitation sent to {performer.stage_name or performer.username}.')
+        else:
+            messages.info(request, f'{performer.stage_name or performer.username} has already been invited to that gig.')
+        return redirect('performers:browse')
+
+    return render(request, 'gigs/invite_performer.html', {
+        'performer': performer,
+        'open_listings': open_listings,
+    })
 
 
 @login_required

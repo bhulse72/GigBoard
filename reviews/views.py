@@ -6,8 +6,7 @@ from accounts.models import User
 from gigs.models import GigApplication
 from venues.models import Venue, VenueManager
 from .forms import ReviewForm
-from .models import Notification, Review
-from .utils import generate_gig_notifications
+from .models import Review
 
 
 def _get_active_venue(request):
@@ -73,6 +72,19 @@ def submit_performer_review(request, user_id):
 
     elif request.user.is_venue_owner() or request.user.is_manager():
         active_venue = _get_active_venue(request)
+        if not active_venue:
+            # Fall back to venue_id posted from the profile page review form
+            fallback_id = request.POST.get('venue_id')
+            if fallback_id:
+                candidate = Venue.objects.filter(pk=fallback_id).first()
+                if candidate:
+                    authorized = (
+                        (request.user.is_venue_owner() and candidate.owner == request.user) or
+                        (request.user.is_manager() and VenueManager.objects.filter(
+                            user=request.user, venue=candidate).exists())
+                    )
+                    if authorized:
+                        active_venue = candidate
         if not active_venue:
             messages.error(request, 'No active venue selected. Visit your venue management page first.')
             return redirect('performers:profile', user_id=user_id)
@@ -167,26 +179,6 @@ def submit_venue_review(request, venue_id):
         'subject_type': 'venue',
         'existing_review': existing_review,
     })
-
-
-@login_required
-def notifications_inbox(request):
-    generate_gig_notifications(request.user)
-    notifications = Notification.objects.filter(
-        recipient=request.user
-    ).select_related('related_application', 'related_application__listing',
-                     'related_application__listing__venue', 'related_application__performer')
-    # Mark all as read on open
-    notifications.filter(is_read=False).update(is_read=True)
-    return render(request, 'reviews/notifications.html', {'notifications': notifications})
-
-
-@login_required
-def dismiss_notification(request, notification_id):
-    if request.method == 'POST':
-        notif = get_object_or_404(Notification, id=notification_id, recipient=request.user)
-        notif.delete()
-    return redirect('reviews:notifications')
 
 
 @login_required
