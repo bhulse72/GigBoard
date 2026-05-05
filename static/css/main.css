@@ -191,9 +191,11 @@ body {
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2) !important;
     background-color: #0f0f1f !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 6px;
+    color-scheme: dark;
 }
 
 label {

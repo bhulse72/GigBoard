@@ -1,28 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Listing — GigBoard{% endblock %}
+{% block title %}Edit Listing — GigBoard{% endblock %}
 
 {% block content %}
 <div style="max-width: 680px; margin: 24px auto; padding: 0 16px;">
     <div class="gc-card gc-card-body">
         <div class="gc-card-title">
-            Create Gig Listing
+            Edit Gig Listing
             <span style="font-size: 13px; font-weight: 400; color: var(--accent); margin-left: 8px;">
-                {{ venue.name }}
+                {{ listing.venue.name }}
             </span>
         </div>
         <form method="post">
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="venue_id">Venue</label>
-                <select name="venue_id" id="venue_id" class="form-control" required>
-                    {% for v in venues %}
-                        <option value="{{ v.pk }}" {% if active_venue and active_venue.pk == v.pk %}selected{% endif %}>
-                            {{ v.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
             {% for field in form %}
                 <div class="mb-3">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -33,7 +23,7 @@
                 </div>
             {% endfor %}
             <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn-gc btn-gc-filled">Create Listing</button>
+                <button type="submit" class="btn-gc btn-gc-filled">Save Changes</button>
                 <a href="{{ next_url }}" class="btn-gc">Cancel</a>
             </div>
         </form>

@@ -66,7 +66,7 @@ venv\Scripts\activate           # Windows
 ### 3. Install dependencies
 
 ```bash
-pip install django psycopg2-binary dj-database-url python-dotenv Pillow
+pip install django psycopg2-binary dj-database-url python-dotenv Pillow whitenoise
 ```
 
 ### 4. Set up environment variables

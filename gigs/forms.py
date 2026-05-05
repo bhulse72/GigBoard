@@ -16,7 +16,8 @@ class GigListingForm(forms.ModelForm):
             'is_open',
         ]
         widgets = {
-            'event_date': forms.DateInput(attrs={'type': 'date'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'event_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'preferred_style': forms.Select(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 4}),
         }

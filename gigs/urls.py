@@ -15,4 +15,5 @@ urlpatterns = [
     path('applications/<int:pk>/update/', views.update_application, name='update_application'),
     path('applications/<int:pk>/verify/', views.verify_gig_completion, name='verify_completion'),
     path('invite/<int:performer_id>/', views.invite_performer, name='invite_performer'),
+    path('listings/<int:pk>/edit/', views.edit_listing, name='edit_listing'),
 ]
