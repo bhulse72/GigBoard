@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils import timezone
 from .models import GigListing, GigApplication
 from .forms import GigListingForm
@@ -32,6 +33,7 @@ def create_listing(request):
         messages.error(request, 'Only venue owners and managers can create listings.')
         return redirect('gigs:listing_list')
 
+    next_url = request.GET.get('next', reverse('gigs:my_listings'))
     venues = Venue.objects.filter(owner=request.user)
     active_venue_id = request.session.get('active_venue_id')
 
@@ -55,8 +57,25 @@ def create_listing(request):
         'form': form,
         'venues': venues,
         'active_venue': venue,
+        'next_url': next_url,
     })
 
+@login_required
+def edit_listing(request, pk):
+    if not (request.user.is_venue_owner() or request.user.is_manager()):
+        messages.error(request, 'Only venue owners and managers can create listings.')
+        return redirect('gigs:listing_list')
+    
+    next_url = request.GET.get('next', reverse('gigs:my_listings'))
+    listing = get_object_or_404(GigListing, pk=pk, created_by=request.user)
+    if request.method == 'POST':
+        form = GigListingForm(request.POST, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect('venues:manage', pk=listing.venue.pk)
+    else:
+        form = GigListingForm(instance=listing)
+    return render(request, 'gigs/edit_listing.html', {'form': form, 'listing': listing, 'next_url': next_url})
 
 @login_required
 def my_listings(request):

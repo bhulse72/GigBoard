@@ -68,6 +68,9 @@ INSTALLED_APPS = [
     'notifications.apps.NotificationsConfig',
 ]
 
+# Silence warnings
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
