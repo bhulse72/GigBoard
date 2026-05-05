@@ -7,6 +7,7 @@ from django.utils import timezone
 from .models import GigListing, GigApplication
 from .forms import GigListingForm
 from venues.models import Venue, VenueManager
+from accounts.models import User
 
 
 @login_required
@@ -163,6 +164,56 @@ def verify_gig_completion(request, pk):
     if next_url:
         return redirect(next_url)
     return redirect('accounts:profile')
+
+
+@login_required
+def invite_performer(request, performer_id):
+    if not (request.user.is_venue_owner() or request.user.is_manager()):
+        messages.error(request, 'Only venue owners and managers can invite performers.')
+        return redirect('accounts:profile')
+
+    performer = get_object_or_404(User, id=performer_id, role='performer')
+
+    # Gather open listings belonging to this user
+    open_listings = GigListing.objects.filter(created_by=request.user, is_open=True).order_by('event_date')
+
+    if not open_listings.exists():
+        messages.error(request, 'You have no open gig listings to invite performers to.')
+        return redirect('performers:browse')
+
+    if request.method == 'POST':
+        from reviews.models import Notification
+
+        listing_id = request.POST.get('listing_id')
+        listing = get_object_or_404(GigListing, pk=listing_id, created_by=request.user, is_open=True)
+
+        already_invited = Notification.objects.filter(
+            recipient=performer,
+            notification_type=Notification.GIG_INVITE,
+            related_listing=listing,
+        ).exists()
+
+        if already_invited:
+            messages.info(request, f'{performer.stage_name or performer.username} has already been invited to that gig.')
+            return redirect('performers:browse')
+
+        venue_display = listing.venue_name or request.user.username
+        Notification.objects.create(
+            recipient=performer,
+            notification_type=Notification.GIG_INVITE,
+            related_listing=listing,
+            message=(
+                f'{venue_display} has invited you to apply for "{listing.title}" '
+                f'on {listing.event_date.strftime("%B %-d, %Y")}.'
+            ),
+        )
+        messages.success(request, f'Invitation sent to {performer.stage_name or performer.username}.')
+        return redirect('performers:browse')
+
+    return render(request, 'gigs/invite_performer.html', {
+        'performer': performer,
+        'open_listings': open_listings,
+    })
 
 
 @login_required

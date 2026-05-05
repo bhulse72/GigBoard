@@ -175,7 +175,8 @@ def notifications_inbox(request):
     notifications = Notification.objects.filter(
         recipient=request.user
     ).select_related('related_application', 'related_application__listing',
-                     'related_application__listing__venue', 'related_application__performer')
+                     'related_application__listing__venue', 'related_application__performer',
+                     'related_listing')
     # Mark all as read on open
     notifications.filter(is_read=False).update(is_read=True)
     return render(request, 'reviews/notifications.html', {'notifications': notifications})

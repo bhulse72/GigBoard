@@ -31,7 +31,8 @@ if not SECRET_KEY:
     raise ImproperlyConfigured('The SECRET_KEY environment variable is not set')
 
 #SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = True  # Development mode - set to False for production
+#DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
@@ -42,10 +43,9 @@ else:
     if not ALLOWED_HOSTS:
         raise ImproperlyConfigured('ALLOWED_HOSTS must be set in production')
     CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition

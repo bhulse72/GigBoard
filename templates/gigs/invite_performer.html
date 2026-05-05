@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Invite {{ performer.stage_name|default:performer.username }} — GigBoard{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 24px auto; padding: 0 16px;">
+
+    <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+        Invite Performer
+    </h1>
+    <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">
+        Send <strong>{{ performer.stage_name|default:performer.get_full_name|default:performer.username }}</strong>
+        an invitation to apply for one of your open gigs.
+    </p>
+
+    <div class="gc-card gc-card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label style="font-size: 14px; font-weight: 500; color: var(--text-primary);">
+                    Select a gig listing
+                </label>
+                <select name="listing_id" class="form-control mt-1" required>
+                    <option value="" disabled selected>Choose a listing…</option>
+                    {% for listing in open_listings %}
+                        <option value="{{ listing.pk }}">
+                            {{ listing.title }} — {{ listing.event_date }} · ${{ listing.pay }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn-gc btn-gc-filled">Send Invitation</button>
+                <a href="{% url 'performers:browse' %}" class="btn-gc">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -18,8 +18,10 @@
                     <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
                         {% if notif.notification_type == 'verify_gig' %}
                             <i class="bi bi-patch-check"></i> Verify Completion
-                        {% else %}
+                        {% elif notif.notification_type == 'leave_review' %}
                             <i class="bi bi-star-fill" style="color: #f59e0b;"></i> Leave a Review
+                        {% else %}
+                            <i class="bi bi-envelope-open-fill" style="color: var(--accent);"></i> Gig Invitation
                         {% endif %}
                     </div>
 
@@ -28,7 +30,11 @@
                     </p>
 
                     <!-- Contextual action link -->
-                    {% if notif.related_application %}
+                    {% if notif.notification_type == 'gig_invite' and notif.related_listing %}
+                        <a href="{% url 'gigs:apply' notif.related_listing.pk %}" class="btn-gc btn-gc-filled" style="font-size: 12px;">
+                            View &amp; Apply
+                        </a>
+                    {% elif notif.related_application %}
                         {% if notif.notification_type == 'verify_gig' %}
                             {% if user.is_performer %}
                                 <a href="{% url 'accounts:profile' %}" class="btn-gc" style="font-size: 12px;">
