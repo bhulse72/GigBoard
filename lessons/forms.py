@@ -8,6 +8,8 @@ class LessonListingForm(forms.ModelForm):
         fields = ['title', 'description', 'style', 'price', 'duration_minutes', 'format', 'location']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
+            'style': forms.Select(attrs={'class': 'form-control'}),
+            'format': forms.Select(attrs={'class': 'form-control'}),
         }
 
 
@@ -16,6 +18,6 @@ class TimeSlotForm(forms.ModelForm):
         model = TimeSlot
         fields = ['date', 'start_time']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
         }

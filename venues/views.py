@@ -28,6 +28,8 @@ def venue_dashboard(request):
         venues = [vm.venue for vm in managed]
     else:
         return redirect('core:home')
+    for venue in venues:
+        venue.genre_tag_list = [tag.strip() for tag in venue.genre_tags.split(',')] if venue.genre_tags else []
     return render(request, 'venues/dashboard.html', {'venues': venues})
 
 
@@ -95,10 +97,13 @@ def manage_venue(request, pk):
         status='accepted',
         listing__event_date__lt=today,
     ).select_related('listing', 'performer').order_by('-listing__event_date')
+    genre_tags = venue.genre_tags.split(',') if venue.genre_tags else []
+
     return render(request, 'venues/manage.html', {
         'venue': venue,
         'gig_listings': gig_listings,
         'past_gigs': past_gigs,
+        'genre_tags': genre_tags,
     })
 
 

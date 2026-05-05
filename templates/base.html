@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <nav class="navbar">
+    <nav class="navbar navbar-expand">
         <a class="navbar-brand" href="/">GigBoard</a>
 
         <ul class="navbar-nav flex-row align-items-center gap-1">
@@ -54,6 +54,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark-gc">
                         <li><a class="dropdown-item-gc" href="{% url 'lessons:listing_list' %}"><i class="bi bi-search"></i> Browse Lessons</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'lessons:my_listings' %}"><i class="bi bi-music-note-list"></i> My Lessons</a></li>
                         <li><a class="dropdown-item-gc" href="{% url 'lessons:my_students' %}"><i class="bi bi-person-lines-fill"></i> My Students</a></li>
                     </ul>
                 </li>
@@ -81,7 +82,7 @@
                         <span>Manage</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark-gc">
-                        <li><a class="dropdown-item-gc" href="{% url 'lessons:my_bookings' %}"><i class="bi bi-bookmark-check-fill"></i> My Bookings</a></li>
+                        <li><a class="dropdown-item-gc" href="{% url 'gigs:my_listings' %}"><i class="bi bi-bookmark-check-fill"></i> My Bookings</a></li>
                         <li><a class="dropdown-item-gc" href="{% url 'gigs:calendar' %}"><i class="bi bi-calendar3"></i> Calendar</a></li>
                     </ul>
                 </li>

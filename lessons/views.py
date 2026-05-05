@@ -8,6 +8,9 @@ from .forms import LessonListingForm, TimeSlotForm
 def listing_list(request):
     listings = LessonListing.objects.filter(is_active=True).order_by('-created_at')
 
+    if request.user.is_authenticated:
+        listings = listings.exclude(instructor=request.user)
+
     style = request.GET.get('style')
     if style:
         listings = listings.filter(style=style)
