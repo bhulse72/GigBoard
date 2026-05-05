@@ -35,11 +35,17 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
+    CSRF_TRUSTED_ORIGINS = []
 else:
     raw_allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
     ALLOWED_HOSTS = [host.strip() for host in raw_allowed_hosts.split(',') if host.strip()]
     if not ALLOWED_HOSTS:
         raise ImproperlyConfigured('ALLOWED_HOSTS must be set in production')
+    CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
 
 
 # Application definition

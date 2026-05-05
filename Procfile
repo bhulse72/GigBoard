@@ -1,1 +1,1 @@
-web: gunicorn GigBoard.wsgi --log-file -
+web: python manage.py collectstatic --noinput && gunicorn GigBoard.wsgi --log-file -
